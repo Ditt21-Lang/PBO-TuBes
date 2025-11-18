@@ -1,0 +1,4 @@
+package com.pomodone.view;
+
+public class MainViewController {
+}
