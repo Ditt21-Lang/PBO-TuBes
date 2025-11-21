@@ -18,7 +18,7 @@ public class DatabaseConfig {
 
     private DatabaseConfig() {
         Map<String, String> env = loadEnv();
-        String url = firstNonEmpty(env.get("DB_URL"), "jdbc:postgresql://localhost:5432/study_focus");
+        String url = firstNonEmpty(env.get("DB_URL"), "jdbc:postgresql://localhost:5432/pomodone");
         String user = firstNonEmpty(env.get("DB_USER"), "postgres");
         String password = firstNonEmpty(env.get("DB_PASSWORD"), "");
 
