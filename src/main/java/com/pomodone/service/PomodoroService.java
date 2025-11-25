@@ -17,12 +17,11 @@ import java.net.URL;
 public class PomodoroService {
     private static PomodoroService instance;
 
-    // Timer State
     public enum TimerState { STOPPED, RUNNING, PAUSED }
     public enum SessionType { FOCUS, SHORT_BREAK, LONG_BREAK }
     public enum PomodoroMode { CLASSIC, INTENSE, CUSTOM }
 
-    // Service State
+    // State dari service
     private Timeline timeline;
     private java.time.Duration timeRemaining;
     private java.time.Duration currentSessionTotalDuration;
@@ -31,7 +30,7 @@ public class PomodoroService {
     private int roundsCompleted = 0;
     private Media alarmSound;
 
-    // Observable Properties for UI Binding
+    // Property yang bisa di-observe buat UI
     private final ReadOnlyStringWrapper hours = new ReadOnlyStringWrapper("00");
     private final ReadOnlyStringWrapper minutes = new ReadOnlyStringWrapper("25");
     private final ReadOnlyStringWrapper seconds = new ReadOnlyStringWrapper("00");
@@ -48,7 +47,7 @@ public class PomodoroService {
         timeline.setCycleCount(Timeline.INDEFINITE);
         
         loadAlarmSound();
-        selectMode(PomodoroMode.CLASSIC); // Initialize with default
+        selectMode(PomodoroMode.CLASSIC); // default-nya classic
     }
     
     private void loadAlarmSound() {
@@ -57,10 +56,10 @@ public class PomodoroService {
             if (resource != null) {
                 alarmSound = new Media(resource.toExternalForm());
             } else {
-                System.err.println("Alarm sound not found.");
+                System.err.println("Suara alarm ga ketemu.");
             }
         } catch (Exception e) {
-            System.err.println("Failed to load alarm sound.");
+            System.err.println("Gagal load suara alarm.");
             e.printStackTrace();
         }
     }
@@ -72,7 +71,6 @@ public class PomodoroService {
         return instance;
     }
 
-    // --- Public API for Controllers ---
 
     public void selectMode(PomodoroMode mode) {
         if (mode == null) return;
@@ -85,7 +83,7 @@ public class PomodoroService {
                 strategy = new IntensePomodoroStrategy();
                 break;
             case CUSTOM:
-                // Custom strategy needs to be updated separately
+                // strategi custom di-update terpisah
                 return;
         }
         this.pomodoroMode.set(mode);
@@ -105,7 +103,7 @@ public class PomodoroService {
             this.pomodoroMode.set(PomodoroMode.CUSTOM);
             stopAndResetTimer();
         } catch (IllegalArgumentException e) {
-            System.err.println("Error applying custom settings: " + e.getMessage());
+            System.err.println("Error pas apply custom settings: " + e.getMessage());
         }
     }
 
@@ -140,7 +138,6 @@ public class PomodoroService {
         progress.set(0.0);
     }
 
-    // --- Getters for Properties (for binding) ---
 
     public ReadOnlyStringProperty hoursProperty() { return hours.getReadOnlyProperty(); }
     public ReadOnlyStringProperty minutesProperty() { return minutes.getReadOnlyProperty(); }
@@ -150,7 +147,6 @@ public class PomodoroService {
     public ReadOnlyObjectProperty<TimerState> timerStateProperty() { return timerState.getReadOnlyProperty(); }
     public ReadOnlyDoubleProperty progressProperty() { return progress.getReadOnlyProperty(); }
 
-    // --- Internal Logic ---
 
     private void tick() {
         timeRemaining = timeRemaining.minusSeconds(1);
@@ -178,12 +174,12 @@ public class PomodoroService {
             mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
             mediaPlayer.play();
 
-            // Create a Timeline to stop the alarm after 9 seconds and then run the callback
+            // Timeline buat berhentiin alarm setelah 9 detik, trus jalanin callback
             Timeline alarmDurationTimer = new Timeline(new KeyFrame(
-                Duration.seconds(9), // Play alarm for 9 seconds
+                Duration.seconds(9), // mainin alarm 9 detik
                 event -> {
                     mediaPlayer.stop();
-                    mediaPlayer.dispose(); // Release resources
+                    mediaPlayer.dispose(); // bebasin resource
                     if (onAlarmFinished != null) {
                         onAlarmFinished.run();
                     }
@@ -192,7 +188,7 @@ public class PomodoroService {
             alarmDurationTimer.setCycleCount(1);
             alarmDurationTimer.play();
         } else {
-            System.err.println("Alarm sound not loaded. Continuing without alarm.");
+            System.err.println("Suara alarm ga ke-load. Lanjut tanpa alarm.");
             if (onAlarmFinished != null) {
                 onAlarmFinished.run();
             }
@@ -200,10 +196,10 @@ public class PomodoroService {
     }
 
     private void startNextSession() {
-        // Stop the main timeline. The timer will be at 00:00.
+        // berhentiin timeline utama, timer bakal di 00:00
         timeline.stop();
 
-        // Play the alarm. The callback will set up and start the next session.
+        // mainin alarm, callback-nya bakal nyiapin dan mulai sesi berikutnya
         playAlarm(() -> {
             if (sessionType.get() == SessionType.FOCUS) {
                 roundsCompleted++;
@@ -214,7 +210,7 @@ public class PomodoroService {
                     sessionType.set(SessionType.SHORT_BREAK);
                     timeRemaining = settings.getShortBreakDuration();
                 }
-            } else { // Was a break
+            } else { // kalo tadi break
                 sessionType.set(SessionType.FOCUS);
                 timeRemaining = settings.getFocusDuration();
             }

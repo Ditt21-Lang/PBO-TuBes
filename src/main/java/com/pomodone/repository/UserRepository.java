@@ -30,7 +30,7 @@ public class UserRepository {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            // In a real app, use a logger
+            // harusnya pake logger
         }
         return Optional.empty();
     }

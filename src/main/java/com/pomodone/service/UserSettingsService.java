@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public class UserSettingsService {
     private final UserRepository userRepository;
-    private final long currentUserId = 1; // Hardcoded user ID for now
+    private final long currentUserId = 1; // ID user sementara, ntar diganti
 
     public UserSettingsService() {
         this.userRepository = new UserRepository();

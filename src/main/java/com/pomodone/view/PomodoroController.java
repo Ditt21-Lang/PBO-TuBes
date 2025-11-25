@@ -16,7 +16,6 @@ import javafx.scene.layout.VBox;
 
 public class PomodoroController {
 
-    //<editor-fold desc="FXML Elements">
     @FXML private Label statusLabel;
     @FXML private Label hoursLabel;
     @FXML private Label minutesLabel;
@@ -46,11 +45,10 @@ public class PomodoroController {
     @FXML private Label shortBreakErrorLabel;
     @FXML private Label longBreakErrorLabel;
     @FXML private Label roundsErrorLabel;
-    //</editor-fold>
 
     private PomodoroService pomodoroService;
 
-    // Validation Properties
+    // buat validasi
     private final BooleanProperty isFocusValid = new SimpleBooleanProperty(true);
     private final BooleanProperty isShortBreakValid = new SimpleBooleanProperty(true);
     private final BooleanProperty isLongBreakValid = new SimpleBooleanProperty(true);
@@ -66,14 +64,14 @@ public class PomodoroController {
     }
 
     private void bindUIToService() {
-        // Bind labels and progress bar
+        // sambungin tampilan ke service
         statusLabel.textProperty().bind(pomodoroService.statusStringProperty());
         hoursLabel.textProperty().bind(pomodoroService.hoursProperty());
         minutesLabel.textProperty().bind(pomodoroService.minutesProperty());
         secondsLabel.textProperty().bind(pomodoroService.secondsProperty());
         progressBar.progressProperty().bind(pomodoroService.progressProperty());
         
-        // Bind visibility of hours
+        // atur visibility jam
         hoursGroup.visibleProperty().bind(pomodoroService.showHoursProperty());
         hoursGroup.managedProperty().bind(pomodoroService.showHoursProperty());
         separatorLabel1.visibleProperty().bind(pomodoroService.showHoursProperty());
@@ -91,7 +89,7 @@ public class PomodoroController {
             }
         });
         
-        // Listen to validity changes to enable/disable start button in custom mode
+        // dengerin perubahan validasi buat aktifin/nonaktifin tombol start di mode custom
         isFocusValid.addListener((obs, o, n) -> updateStartButtonState());
         isShortBreakValid.addListener((obs, o, n) -> updateStartButtonState());
         isLongBreakValid.addListener((obs, o, n) -> updateStartButtonState());
@@ -115,7 +113,7 @@ public class PomodoroController {
                 pomodoroService.selectMode(PomodoroService.PomodoroMode.INTENSE);
             } else if (newToggle == customModeButton) {
                 updateSettingsView(PomodoroService.PomodoroMode.CUSTOM);
-                validateAllCustomFields(); // Validate once on switch
+                validateAllCustomFields(); // validasi sekali pas ganti
                 applyCustomSettings();
             }
         });
@@ -161,21 +159,21 @@ public class PomodoroController {
     
     private boolean validatePositiveInteger(String value, TextField field, Label errorLabel, boolean allowZero) {
         if (value == null || value.trim().isEmpty()) {
-            toggleError(field, errorLabel, true, "Cannot be empty.");
+            toggleError(field, errorLabel, true, "Gaboleh kosong.");
             return false;
         }
         if (value.contains(".") || value.contains(",")) {
-            toggleError(field, errorLabel, true, "Decimals not allowed.");
+            toggleError(field, errorLabel, true, "Gaboleh desimal.");
             return false;
         }
         try {
             int intValue = Integer.parseInt(value);
             if (allowZero ? intValue < 0 : intValue <= 0) {
-                toggleError(field, errorLabel, true, "Must be positive.");
+                toggleError(field, errorLabel, true, "Harus positif.");
                 return false;
             }
         } catch (NumberFormatException e) {
-            toggleError(field, errorLabel, true, "Must be a valid number.");
+            toggleError(field, errorLabel, true, "Harus angka valid.");
             return false;
         }
         toggleError(field, errorLabel, false, "");

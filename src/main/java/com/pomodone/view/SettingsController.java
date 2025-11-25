@@ -29,7 +29,7 @@ public class SettingsController {
 
     private UserSettingsService userSettingsService;
     
-    // Validation Properties
+    // buat validasi
     private final BooleanProperty isNameValid = new SimpleBooleanProperty(false);
     private final BooleanProperty isDailyTargetValid = new SimpleBooleanProperty(false);
     private final BooleanProperty isWeeklyTargetValid = new SimpleBooleanProperty(false);
@@ -44,7 +44,7 @@ public class SettingsController {
         saveTargetsButton.setOnAction(event -> handleSaveTargets());
         resetTargetsButton.setOnAction(event -> handleResetTargets());
 
-        // Disable buttons based on validation state
+        // matiin tombolnya kalo ga valid
         updateNameButton.disableProperty().bind(isNameValid.not());
         
         BooleanBinding areTargetsInvalid = isDailyTargetValid.not().or(isWeeklyTargetValid.not());
@@ -69,21 +69,21 @@ public class SettingsController {
 
     private boolean validatePositiveInteger(String value, TextField field, Label errorLabel) {
         if (value == null || value.trim().isEmpty()) {
-            toggleError(field, errorLabel, true, "Cannot be empty.");
+            toggleError(field, errorLabel, true, "Gaboleh kosong slur.");
             return false;
         }
         if (value.contains(".") || value.contains(",")) {
-            toggleError(field, errorLabel, true, "Decimals not allowed.");
+            toggleError(field, errorLabel, true, "Gaboleh ada desimal.");
             return false;
         }
         try {
             int intValue = Integer.parseInt(value);
             if (intValue < 0) {
-                toggleError(field, errorLabel, true, "Must be a positive number.");
+                toggleError(field, errorLabel, true, "Harus bilangan positif.");
                 return false;
             }
         } catch (NumberFormatException e) {
-            toggleError(field, errorLabel, true, "Must be a valid whole number.");
+            toggleError(field, errorLabel, true, "Harus bilangan bulet.");
             return false;
         }
         toggleError(field, errorLabel, false, "");
@@ -111,7 +111,7 @@ public class SettingsController {
             dailyTargetField.setText(String.valueOf(user.getDailyPomodoroTarget()));
             weeklyTargetField.setText(String.valueOf(user.getWeeklyPomodoroTarget()));
         } else {
-            showAlert(Alert.AlertType.ERROR, "Error", "Could not load user settings.");
+            showAlert(Alert.AlertType.ERROR, "Error", "Gabisa load settingan user.");
             nameField.setDisable(true);
             dailyTargetField.setDisable(true);
             weeklyTargetField.setDisable(true);
@@ -121,9 +121,9 @@ public class SettingsController {
     private void handleUpdateName() {
         boolean success = userSettingsService.updateUserName(nameField.getText());
         if (success) {
-            showAlert(Alert.AlertType.INFORMATION, "Success", "Name updated successfully.");
+            showAlert(Alert.AlertType.INFORMATION, "Success", "Nama berhasil diupdate.");
         } else {
-            showAlert(Alert.AlertType.ERROR, "Error", "Failed to update name.");
+            showAlert(Alert.AlertType.ERROR, "Error", "Gagal update nama.");
         }
     }
 
@@ -134,12 +134,12 @@ public class SettingsController {
 
             boolean success = userSettingsService.updateUserTargets(dailyTarget, weeklyTarget);
             if (success) {
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Targets saved successfully.");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Target berhasil disimpan.");
             } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to save targets.");
+                showAlert(Alert.AlertType.ERROR, "Error", "Gagal nyimpen target.");
             }
         } catch (NumberFormatException e) {
-            // This should not be reached if save button is properly disabled
+            // harusnya gabisa nyampe sini kalo tombolnya udah di-disable
             showAlert(Alert.AlertType.ERROR, "Error", "Invalid number format.");
         }
     }

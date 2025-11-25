@@ -21,12 +21,12 @@ public class MainApp extends Application {
         Scene scene = new Scene(root);
         stage.setTitle("Pomodone");
 
-        // Set application icon
+        // Set ikon aplikasi
         try (InputStream iconStream = getClass().getResourceAsStream("/images/icon.jpeg")) {
             if (iconStream != null) {
                 stage.getIcons().add(new Image(iconStream));
             } else {
-                System.err.println("Application icon not found.");
+                System.err.println("Ikon aplikasi ga ketemu.");
             }
         } catch (Exception e) {
             e.printStackTrace();

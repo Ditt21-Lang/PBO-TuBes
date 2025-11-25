@@ -8,7 +8,7 @@ public class CustomPomodoroStrategy implements PomodoroStrategy {
 
     public CustomPomodoroStrategy(PomodoroSettings settings) {
         if (settings == null) {
-            throw new IllegalArgumentException("Custom Pomodoro settings cannot be null.");
+            throw new IllegalArgumentException("Settingan Pomodoro custom gaboleh null.");
         }
         this.settings = settings;
     }

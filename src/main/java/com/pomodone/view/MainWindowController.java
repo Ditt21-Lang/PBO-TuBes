@@ -32,7 +32,7 @@ public class MainWindowController {
 
     @FXML
     public void initialize() {
-        // Set initial active nav item and load initial view
+        // Set nav item yang aktif dan load tampilan awal
         activeNav = homeNav;
         navigateTo("DashboardView.fxml");
 
@@ -60,7 +60,7 @@ public class MainWindowController {
             contentPane.setContent(view);
         } catch (IOException | NullPointerException e) {
             e.printStackTrace();
-            Label errorLabel = new Label("Error: Could not load page " + fxmlFile);
+            Label errorLabel = new Label("Error: Gagal load halaman " + fxmlFile);
             contentPane.setContent(errorLabel);
         }
     }

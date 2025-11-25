@@ -15,7 +15,6 @@ public class User {
         this.weeklyPomodoroTarget = weeklyPomodoroTarget;
     }
 
-    // Getters
     public long getId() {
         return id;
     }
@@ -32,7 +31,6 @@ public class User {
         return weeklyPomodoroTarget;
     }
 
-    // Setters
     public void setId(long id) {
         this.id = id;
     }

@@ -15,10 +15,10 @@ public class Task {
 
     Task(TaskBuilder builder) {
         this.id = builder.id;
-        this.title = Objects.requireNonNull(builder.title, "title is required");
+        this.title = Objects.requireNonNull(builder.title, "title wajib diisi");
         this.description = builder.description;
         this.dueDate = builder.dueDate;
-        this.difficulty = Objects.requireNonNull(builder.difficulty, "difficulty is required");
+        this.difficulty = Objects.requireNonNull(builder.difficulty, "difficulty wajib diisi");
         this.status = resolveStatus(builder);
         this.createdAt = builder.createdAt;
         this.updatedAt = builder.updatedAt;
@@ -87,7 +87,7 @@ public class Task {
     }
 
     private TaskStatus resolveStatus(TaskBuilder builder) {
-        TaskStatus initialStatus = Objects.requireNonNull(builder.status, "status is required");
+        TaskStatus initialStatus = Objects.requireNonNull(builder.status, "status wajib diisi");
         if (builder.dueDate == null) {
             return initialStatus;
         }
