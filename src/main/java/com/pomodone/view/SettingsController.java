@@ -2,43 +2,105 @@ package com.pomodone.view;
 
 import com.pomodone.model.user.User;
 import com.pomodone.service.UserSettingsService;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 import java.util.Optional;
 
 public class SettingsController {
 
-    @FXML
-    private TextField nameField;
-
-    @FXML
-    private Button updateNameButton;
-
-    @FXML
-    private TextField dailyTargetField;
-
-    @FXML
-    private TextField weeklyTargetField;
-
-    @FXML
-    private Button resetTargetsButton;
-
-    @FXML
-    private Button saveTargetsButton;
+    // FXML Elements
+    @FXML private TextField nameField;
+    @FXML private Button updateNameButton;
+    @FXML private Label nameErrorLabel;
+    @FXML private TextField dailyTargetField;
+    @FXML private Label dailyTargetErrorLabel;
+    @FXML private TextField weeklyTargetField;
+    @FXML private Label weeklyTargetErrorLabel;
+    @FXML private Button resetTargetsButton;
+    @FXML private Button saveTargetsButton;
 
     private UserSettingsService userSettingsService;
+    
+    // Validation Properties
+    private final BooleanProperty isNameValid = new SimpleBooleanProperty(false);
+    private final BooleanProperty isDailyTargetValid = new SimpleBooleanProperty(false);
+    private final BooleanProperty isWeeklyTargetValid = new SimpleBooleanProperty(false);
 
     @FXML
     public void initialize() {
         this.userSettingsService = new UserSettingsService();
+        setupValidationListeners();
         loadUserSettings();
 
         updateNameButton.setOnAction(event -> handleUpdateName());
         saveTargetsButton.setOnAction(event -> handleSaveTargets());
         resetTargetsButton.setOnAction(event -> handleResetTargets());
+
+        // Disable buttons based on validation state
+        updateNameButton.disableProperty().bind(isNameValid.not());
+        
+        BooleanBinding areTargetsInvalid = isDailyTargetValid.not().or(isWeeklyTargetValid.not());
+        saveTargetsButton.disableProperty().bind(areTargetsInvalid);
+    }
+
+    private void setupValidationListeners() {
+        nameField.textProperty().addListener((obs, oldVal, newVal) -> {
+            boolean isValid = newVal != null && !newVal.trim().isEmpty();
+            isNameValid.set(isValid);
+            toggleError(nameField, nameErrorLabel, !isValid, "Name cannot be empty.");
+        });
+
+        dailyTargetField.textProperty().addListener((obs, oldVal, newVal) -> {
+            isDailyTargetValid.set(validatePositiveInteger(newVal, dailyTargetField, dailyTargetErrorLabel));
+        });
+
+        weeklyTargetField.textProperty().addListener((obs, oldVal, newVal) -> {
+            isWeeklyTargetValid.set(validatePositiveInteger(newVal, weeklyTargetField, weeklyTargetErrorLabel));
+        });
+    }
+
+    private boolean validatePositiveInteger(String value, TextField field, Label errorLabel) {
+        if (value == null || value.trim().isEmpty()) {
+            toggleError(field, errorLabel, true, "Cannot be empty.");
+            return false;
+        }
+        if (value.contains(".") || value.contains(",")) {
+            toggleError(field, errorLabel, true, "Decimals not allowed.");
+            return false;
+        }
+        try {
+            int intValue = Integer.parseInt(value);
+            if (intValue < 0) {
+                toggleError(field, errorLabel, true, "Must be a positive number.");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            toggleError(field, errorLabel, true, "Must be a valid whole number.");
+            return false;
+        }
+        toggleError(field, errorLabel, false, "");
+        return true;
+    }
+
+    private void toggleError(Node field, Label errorLabel, boolean showError, String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(showError);
+        errorLabel.setManaged(showError);
+        if (showError) {
+            if (!field.getStyleClass().contains("field-error")) {
+                field.getStyleClass().add("field-error");
+            }
+        } else {
+            field.getStyleClass().remove("field-error");
+        }
     }
 
     private void loadUserSettings() {
@@ -50,7 +112,6 @@ public class SettingsController {
             weeklyTargetField.setText(String.valueOf(user.getWeeklyPomodoroTarget()));
         } else {
             showAlert(Alert.AlertType.ERROR, "Error", "Could not load user settings.");
-            // Disable fields if user not found
             nameField.setDisable(true);
             dailyTargetField.setDisable(true);
             weeklyTargetField.setDisable(true);
@@ -58,13 +119,7 @@ public class SettingsController {
     }
 
     private void handleUpdateName() {
-        String newName = nameField.getText();
-        if (newName == null || newName.trim().isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Validation Error", "Name cannot be empty.");
-            return;
-        }
-
-        boolean success = userSettingsService.updateUserName(newName);
+        boolean success = userSettingsService.updateUserName(nameField.getText());
         if (success) {
             showAlert(Alert.AlertType.INFORMATION, "Success", "Name updated successfully.");
         } else {
@@ -77,11 +132,6 @@ public class SettingsController {
             int dailyTarget = Integer.parseInt(dailyTargetField.getText());
             int weeklyTarget = Integer.parseInt(weeklyTargetField.getText());
 
-            if (dailyTarget < 0 || weeklyTarget < 0) {
-                showAlert(Alert.AlertType.WARNING, "Validation Error", "Targets cannot be negative.");
-                return;
-            }
-
             boolean success = userSettingsService.updateUserTargets(dailyTarget, weeklyTarget);
             if (success) {
                 showAlert(Alert.AlertType.INFORMATION, "Success", "Targets saved successfully.");
@@ -89,14 +139,14 @@ public class SettingsController {
                 showAlert(Alert.AlertType.ERROR, "Error", "Failed to save targets.");
             }
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.WARNING, "Validation Error", "Please enter valid numbers for targets.");
+            // This should not be reached if save button is properly disabled
+            showAlert(Alert.AlertType.ERROR, "Error", "Invalid number format.");
         }
     }
 
     private void handleResetTargets() {
-        // Reset to some default values, e.g., 0 or load from a config
-        dailyTargetField.setText("0");
-        weeklyTargetField.setText("0");
+        dailyTargetField.setText("5");
+        weeklyTargetField.setText("25");
     }
 
     private void showAlert(Alert.AlertType alertType, String title, String content) {

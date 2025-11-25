@@ -104,16 +104,28 @@
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
                 <Label styleClass="settings-label" text="Focus Duration (minutes)" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                <TextField fx:id="customFocusField" styleClass="settings-field" text="25" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <TextField fx:id="customFocusField" styleClass="settings-field" text="25"/>
+                    <Label fx:id="focusErrorLabel" styleClass="error-label" text="Must be a positive number." managed="false" visible="false"/>
+                </VBox>
 
                 <Label styleClass="settings-label" text="Short Break (minutes)" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
-                <TextField fx:id="customShortBreakField" styleClass="settings-field" text="5" GridPane.columnIndex="4" GridPane.rowIndex="0"/>
+                <VBox spacing="4.0" GridPane.columnIndex="4" GridPane.rowIndex="0">
+                    <TextField fx:id="customShortBreakField" styleClass="settings-field" text="5"/>
+                    <Label fx:id="shortBreakErrorLabel" styleClass="error-label" text="Must be a positive number." managed="false" visible="false"/>
+                </VBox>
 
                 <Label styleClass="settings-label" text="Long Break (minutes)" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                <TextField fx:id="customLongBreakField" styleClass="settings-field" text="15" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <TextField fx:id="customLongBreakField" styleClass="settings-field" text="15"/>
+                    <Label fx:id="longBreakErrorLabel" styleClass="error-label" text="Must be a positive number." managed="false" visible="false"/>
+                </VBox>
 
                 <Label styleClass="settings-label" text="Rounds" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
-                <TextField fx:id="customRoundsField" styleClass="settings-field" text="4" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
+                <VBox spacing="4.0" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                    <TextField fx:id="customRoundsField" styleClass="settings-field" text="4"/>
+                    <Label fx:id="roundsErrorLabel" styleClass="error-label" text="Must be a positive number." managed="false" visible="false"/>
+                </VBox>
             </GridPane>
         </StackPane>
     </VBox>
