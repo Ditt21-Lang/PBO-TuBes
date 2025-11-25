@@ -8,7 +8,11 @@ import com.pomodone.strategy.pomodoro.PomodoroStrategy;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
+
+import java.net.URL;
 
 public class PomodoroService {
     private static PomodoroService instance;
@@ -25,6 +29,7 @@ public class PomodoroService {
     private PomodoroStrategy strategy;
     private PomodoroSettings settings;
     private int roundsCompleted = 0;
+    private Media alarmSound;
 
     // Observable Properties for UI Binding
     private final ReadOnlyStringWrapper hours = new ReadOnlyStringWrapper("00");
@@ -42,7 +47,22 @@ public class PomodoroService {
         timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> tick()));
         timeline.setCycleCount(Timeline.INDEFINITE);
         
+        loadAlarmSound();
         selectMode(PomodoroMode.CLASSIC); // Initialize with default
+    }
+    
+    private void loadAlarmSound() {
+        try {
+            URL resource = getClass().getResource("/audio/audio.mp3");
+            if (resource != null) {
+                alarmSound = new Media(resource.toExternalForm());
+            } else {
+                System.err.println("Alarm sound not found.");
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to load alarm sound.");
+            e.printStackTrace();
+        }
     }
 
     public static synchronized PomodoroService getInstance() {
@@ -65,8 +85,8 @@ public class PomodoroService {
                 strategy = new IntensePomodoroStrategy();
                 break;
             case CUSTOM:
-                // Custom strategy needs to be updated separately with settings from the UI
-                return; // Do nothing until custom settings are applied
+                // Custom strategy needs to be updated separately
+                return;
         }
         this.pomodoroMode.set(mode);
         this.settings = strategy.getSettings();
@@ -151,26 +171,60 @@ public class PomodoroService {
             progress.set(total > 0 ? elapsed / total : 0);
         }
     }
+    
+    private void playAlarm(Runnable onAlarmFinished) {
+        if (alarmSound != null) {
+            MediaPlayer mediaPlayer = new MediaPlayer(alarmSound);
+            mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+            mediaPlayer.play();
+
+            // Create a Timeline to stop the alarm after 9 seconds and then run the callback
+            Timeline alarmDurationTimer = new Timeline(new KeyFrame(
+                Duration.seconds(9), // Play alarm for 9 seconds
+                event -> {
+                    mediaPlayer.stop();
+                    mediaPlayer.dispose(); // Release resources
+                    if (onAlarmFinished != null) {
+                        onAlarmFinished.run();
+                    }
+                }
+            ));
+            alarmDurationTimer.setCycleCount(1);
+            alarmDurationTimer.play();
+        } else {
+            System.err.println("Alarm sound not loaded. Continuing without alarm.");
+            if (onAlarmFinished != null) {
+                onAlarmFinished.run();
+            }
+        }
+    }
 
     private void startNextSession() {
-        if (sessionType.get() == SessionType.FOCUS) {
-            roundsCompleted++;
-            if (roundsCompleted % settings.getRoundsBeforeLongBreak() == 0) {
-                sessionType.set(SessionType.LONG_BREAK);
-                timeRemaining = settings.getLongBreakDuration();
-            } else {
-                sessionType.set(SessionType.SHORT_BREAK);
-                timeRemaining = settings.getShortBreakDuration();
+        // Stop the main timeline. The timer will be at 00:00.
+        timeline.stop();
+
+        // Play the alarm. The callback will set up and start the next session.
+        playAlarm(() -> {
+            if (sessionType.get() == SessionType.FOCUS) {
+                roundsCompleted++;
+                if (roundsCompleted % settings.getRoundsBeforeLongBreak() == 0) {
+                    sessionType.set(SessionType.LONG_BREAK);
+                    timeRemaining = settings.getLongBreakDuration();
+                } else {
+                    sessionType.set(SessionType.SHORT_BREAK);
+                    timeRemaining = settings.getShortBreakDuration();
+                }
+            } else { // Was a break
+                sessionType.set(SessionType.FOCUS);
+                timeRemaining = settings.getFocusDuration();
             }
-        } else { // Was a break
-            sessionType.set(SessionType.FOCUS);
-            timeRemaining = settings.getFocusDuration();
-        }
-        currentSessionTotalDuration = timeRemaining;
-        updateStatusString();
-        updateTimerLabels();
-        timeline.play();
-        timerState.set(TimerState.RUNNING);
+            currentSessionTotalDuration = timeRemaining;
+            updateStatusString();
+            updateTimerLabels();
+
+            timeline.play();
+            timerState.set(TimerState.RUNNING);
+        });
     }
 
     private void updateTimerLabels() {
