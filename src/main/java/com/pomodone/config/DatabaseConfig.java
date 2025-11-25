@@ -82,7 +82,7 @@ public class DatabaseConfig {
                     }
                 }
             } catch (Exception ignored) {
-                // ignore and fall back to System.getenv
+                // cuekin aja, fallback ke System.getenv
             }
         }
         return env;

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+
+<VBox spacing="24.0" styleClass="main-content" xmlns="http://javafx.com/javafx/21.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pomodone.view.PomodoroController" alignment="TOP_CENTER">
+
+    <!-- Header -->
+    <VBox alignment="CENTER">
+        <Label styleClass="header-title" text="Pomodoro Timer"/>
+        <Label fx:id="statusLabel" styleClass="pomodoro-status-label" text="Choose a mode to get started"/>
+    </VBox>
+
+    <!-- Timer Display Card -->
+    <VBox alignment="CENTER" spacing="12.0" styleClass="task-card" maxWidth="850.0">
+        <padding>
+            <Insets top="30" right="50" bottom="30" left="50"/>
+        </padding>
+        <!-- Timer Numbers -->
+        <HBox alignment="CENTER" fx:id="timerBox">
+            <VBox alignment="CENTER" fx:id="hoursGroup" managed="false" visible="false">
+                <Label fx:id="hoursLabel" style="-fx-font-size: 96px; -fx-font-weight: 700;" text="00"/>
+                <Label text="hours" style="-fx-text-fill: -color-text-muted;"/>
+            </VBox>
+            <Label fx:id="separatorLabel1" style="-fx-font-size: 80px; -fx-font-weight: 700; -fx-padding: 0 10 10 10;" text=":" managed="false" visible="false"/>
+            <VBox alignment="CENTER">
+                <Label fx:id="minutesLabel" style="-fx-font-size: 96px; -fx-font-weight: 700;" text="25"/>
+                <Label text="minutes" style="-fx-text-fill: -color-text-muted;"/>
+            </VBox>
+            <Label style="-fx-font-size: 80px; -fx-font-weight: 700; -fx-padding: 0 10 10 10;" text=":"/>
+            <VBox alignment="CENTER">
+                <Label fx:id="secondsLabel" style="-fx-font-size: 96px; -fx-font-weight: 700;" text="00"/>
+                <Label text="seconds" style="-fx-text-fill: -color-text-muted;"/>
+            </VBox>
+        </HBox>
+        <ProgressBar fx:id="progressBar" prefWidth="700.0" progress="0.0"/>
+        <HBox fx:id="controlsBox" alignment="CENTER" spacing="12.0">
+            <padding>
+                <Insets top="20.0"/>
+            </padding>
+            <Button fx:id="startButton" mnemonicParsing="false" styleClass="primary-button" text="Start"/>
+            <Button fx:id="stopButton" mnemonicParsing="false" styleClass="secondary-button" text="Stop"/>
+        </HBox>
+    </VBox>
+
+    <!-- Mode Selection -->
+    <VBox alignment="CENTER" spacing="12.0">
+        <Label styleClass="settings-label" text="SELECT MODE"/>
+        <HBox fx:id="modeSelectionBox" alignment="CENTER" spacing="10.0">
+            <fx:define>
+                <ToggleGroup fx:id="modeToggleGroup"/>
+            </fx:define>
+            <ToggleButton fx:id="classicModeButton" text="Classic" toggleGroup="$modeToggleGroup" styleClass="secondary-button, mode-toggle-button" selected="true"/>
+            <ToggleButton fx:id="intenseModeButton" text="Intense" toggleGroup="$modeToggleGroup" styleClass="secondary-button, mode-toggle-button"/>
+            <ToggleButton fx:id="customModeButton" text="Custom" toggleGroup="$modeToggleGroup" styleClass="secondary-button, mode-toggle-button"/>
+        </HBox>
+    </VBox>
+
+
+    <!-- Settings Card -->
+    <VBox fx:id="customSettingsPane" spacing="20.0" styleClass="task-card" maxWidth="850.0">
+        <Label fx:id="settingsTitleLabel" styleClass="task-card-header" text="Classic Settings"/>
+        <StackPane>
+            <!-- Display Pane (for Classic/Intense) -->
+            <GridPane fx:id="displayGridPane" hgap="24.0" vgap="16.0">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="NEVER"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                    <ColumnConstraints hgrow="NEVER" prefWidth="20.0"/>
+                    <ColumnConstraints hgrow="NEVER"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+                <Label styleClass="settings-label" text="Focus Duration:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <Label fx:id="displayFocusLabel" styleClass="settings-label, -fx-font-weight: 700;" text="25 minutes" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                <Label styleClass="settings-label" text="Short Break:" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                <Label fx:id="displayShortBreakLabel" styleClass="settings-label, -fx-font-weight: 700;" text="5 minutes" GridPane.columnIndex="4" GridPane.rowIndex="0"/>
+
+                <Label styleClass="settings-label" text="Long Break:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <Label fx:id="displayLongBreakLabel" styleClass="settings-label, -fx-font-weight: 700;" text="15 minutes" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                <Label styleClass="settings-label" text="Rounds:" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                <Label fx:id="displayRoundsLabel" styleClass="settings-label, -fx-font-weight: 700;" text="4" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
+            </GridPane>
+            
+            <!-- Input Pane (for Custom) -->
+            <GridPane fx:id="inputFieldsGridPane" hgap="24.0" vgap="16.0" visible="false" managed="false">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="NEVER"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                    <ColumnConstraints hgrow="NEVER" prefWidth="20.0"/>
+                    <ColumnConstraints hgrow="NEVER"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+                <Label styleClass="settings-label" text="Focus Duration (minutes)" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <TextField fx:id="customFocusField" styleClass="settings-field" text="25"/>
+                    <Label fx:id="focusErrorLabel" styleClass="error-label" text="Must be a positive number." managed="false" visible="false"/>
+                </VBox>
+
+                <Label styleClass="settings-label" text="Short Break (minutes)" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                <VBox spacing="4.0" GridPane.columnIndex="4" GridPane.rowIndex="0">
+                    <TextField fx:id="customShortBreakField" styleClass="settings-field" text="5"/>
+                    <Label fx:id="shortBreakErrorLabel" styleClass="error-label" text="Must be a positive number." managed="false" visible="false"/>
+                </VBox>
+
+                <Label styleClass="settings-label" text="Long Break (minutes)" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <VBox spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <TextField fx:id="customLongBreakField" styleClass="settings-field" text="15"/>
+                    <Label fx:id="longBreakErrorLabel" styleClass="error-label" text="Must be a positive number." managed="false" visible="false"/>
+                </VBox>
+
+                <Label styleClass="settings-label" text="Rounds" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                <VBox spacing="4.0" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                    <TextField fx:id="customRoundsField" styleClass="settings-field" text="4"/>
+                    <Label fx:id="roundsErrorLabel" styleClass="error-label" text="Must be a positive number." managed="false" visible="false"/>
+                </VBox>
+            </GridPane>
+        </StackPane>
+    </VBox>
+
+</VBox>

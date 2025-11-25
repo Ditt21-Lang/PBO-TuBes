@@ -1,0 +1,246 @@
+/* modern-app.css */
+
+.root {
+    -fx-font-family: "Inter", "Segoe UI", "System";
+    -fx-background-color: #F3F4F6; /* bg-gray-100 */
+
+    /* Colors from mockup */
+    -color-bg: #F3F4F6; /* bg-gray-100 */
+    -color-sidebar: #FFFFFF; /* bg-white */
+    -color-card: #FFFFFF; /* bg-white */
+    -color-text-dark: #1F2937; /* text-gray-800 */
+    -color-text-main: #374151; /* text-gray-700 */
+    -color-text-muted: #6B7280; /* text-gray-500 */
+    -color-accent: #06B6D4; /* cyan-500 */
+    -color-accent-hover: #0891B2; /* cyan-600 */
+    -color-secondary-text: #475569; /* slate-600 */
+    -color-nav-active-bg: #E5E7EB; /* bg-gray-200 */
+    -color-nav-hover-bg: #F3F4F6; /* bg-gray-100 */
+    -color-border: #E5E7EB; /* border-gray-200 */
+    -color-red: #EF4444;   /* text-red-500 */
+    -color-yellow: #F59E0B; /* text-yellow-500 */
+    -color-green: #10B981; /* text-green-500 */
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    -fx-background-color: -color-sidebar;
+    -fx-padding: 24px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 20, 0, 5, 10);
+}
+
+.sidebar-header .icon {
+    -fx-background-color: -color-accent;
+    -fx-background-radius: 999px; /* rounded-full */
+}
+
+.sidebar-header .title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-dark;
+}
+
+.nav-item {
+    -fx-padding: 8px 16px; /* px-4 py-2 */
+    -fx-background-radius: 8px; /* rounded-lg */
+    -fx-cursor: hand;
+}
+
+.nav-item .nav-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: -color-text-muted;
+}
+
+.nav-item:hover {
+    -fx-background-color: -color-nav-hover-bg;
+}
+
+.nav-item-active {
+    -fx-background-color: -color-nav-active-bg;
+}
+
+.nav-item-active .nav-text {
+    -fx-font-weight: 600; /* font-semibold */
+    -fx-text-fill: -color-text-dark;
+}
+
+
+/* --- Main Content --- */
+.main-content {
+    -fx-padding: 32px;
+}
+
+.header-title {
+    -fx-font-size: 28px; /* text-3xl approx */
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-dark;
+}
+
+.header-subtitle, .pomodoro-status-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: -color-text-muted;
+}
+
+.pomodoro-status-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: 500;
+}
+
+
+.search-field {
+    -fx-background-radius: 8px; /* rounded-lg */
+    -fx-border-radius: 8px;
+    -fx-border-color: #D1D5DB; /* border-gray-300 */
+    -fx-padding: 8px 12px;
+    -fx-prompt-text-fill: -color-text-muted;
+    -fx-background-insets: 0;
+}
+.search-field:focused {
+    -fx-border-color: -color-accent;
+    -fx-border-width: 2px;
+}
+
+.primary-button {
+    -fx-background-color: -color-accent;
+    -fx-text-fill: white;
+    -fx-font-weight: 600; /* font-semibold */
+    -fx-background-radius: 8px; /* rounded-lg */
+    -fx-padding: 8px 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0.1, 0, 4);
+    -fx-cursor: hand;
+}
+.primary-button:hover {
+    -fx-background-color: -color-accent-hover;
+}
+
+.secondary-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-secondary-text;
+    -fx-font-weight: 600;
+    -fx-border-color: #E2E8F0; /* slate-200 */
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+.secondary-button:hover {
+    -fx-background-color: #F8FAFC; /* slate-50 */
+    -fx-border-color: #CBD5E1; /* slate-300 */
+}
+
+.mode-toggle-button.toggle-button:selected {
+    -fx-background-color: -color-accent;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+}
+.mode-toggle-button.toggle-button:selected:hover {
+    -fx-background-color: -color-accent-hover;
+}
+
+
+
+/* --- Cards --- */
+.stat-card {
+    -fx-background-color: -color-card;
+    -fx-padding: 24px;
+    -fx-background-radius: 12px; /* rounded-xl */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 15, 0, 0, 2);
+}
+
+.stat-card-title {
+    -fx-font-size: 13px; /* text-sm */
+    -fx-font-weight: 500; /* font-medium */
+    -fx-text-fill: -color-text-muted;
+}
+
+.stat-card-value {
+    -fx-font-size: 28px; /* text-3xl approx */
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-dark;
+}
+
+/* --- Task List & Settings --- */
+.task-card {
+    -fx-background-color: -color-card;
+    -fx-padding: 24px;
+    -fx-background-radius: 12px; /* rounded-xl */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 15, 0, 0, 2);
+}
+
+.task-card-header {
+    -fx-font-size: 18px; /* text-lg */
+    -fx-font-weight: 600; /* font-semibold */
+    -fx-text-fill: -color-text-dark;
+}
+
+.settings-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -color-text-main;
+}
+
+.settings-field {
+    -fx-background-color: #F8FAFC; /* slate-50 */
+    -fx-background-radius: 6px;
+    -fx-border-color: #E2E8F0; /* slate-200 */
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-padding: 10px;
+    -fx-font-size: 14px;
+}
+.settings-field:focused {
+    -fx-border-color: -color-accent;
+    -fx-background-color: white;
+}
+
+.field-error {
+    -fx-border-color: -color-red;
+    -fx-border-width: 1.5px;
+}
+
+.error-label {
+    -fx-text-fill: -color-red;
+    -fx-font-size: 12px;
+}
+
+
+.task-item {
+    -fx-padding: 12px; /* p-3 */
+    -fx-background-radius: 8px; /* rounded-lg */
+}
+.task-item:hover {
+    -fx-background-color: #F9FAFB; /* hover:bg-gray-50 */
+}
+.task-item-title {
+    -fx-font-weight: 600; /* font-semibold */
+    -fx-text-fill: -color-text-dark;
+}
+.task-item-priority-high {
+    -fx-font-size: 12px; /* text-sm */
+    -fx-text-fill: -color-red;
+}
+.task-item-priority-medium {
+    -fx-font-size: 12px; /* text-sm */
+    -fx-text-fill: -color-yellow;
+}
+.task-item-priority-low {
+    -fx-font-size: 12px; /* text-sm */
+    -fx-text-fill: -color-green;
+}
+.task-item-due-date {
+    -fx-font-size: 12px; /* text-sm */
+    -fx-text-fill: #9CA3AF; /* text-gray-400 */
+}
+
+/* Generic headline classes for placeholder pages */
+.headline {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-dark;
+}
+
+.subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: -color-text-muted;
+}

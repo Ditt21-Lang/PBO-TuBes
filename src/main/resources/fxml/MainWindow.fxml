@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane fx:id="rootPane"
+            prefWidth="1280.0"
+            prefHeight="800.0"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            stylesheets="@/css/modern-app.css"
+            fx:controller="com.pomodone.view.MainWindowController">
+
+    <!-- Sidebar -->
+    <left>
+        <VBox prefWidth="256.0"
+              spacing="40.0"
+              styleClass="sidebar">
+            <padding>
+                <Insets top="24.0" right="24.0" bottom="24.0" left="24.0"/>
+            </padding>
+
+            <!-- Sidebar Header -->
+            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="sidebar-header">
+                <Region styleClass="icon" minWidth="32.0" minHeight="32.0"/>
+                <Label text="Pomodone" styleClass="title"/>
+            </HBox>
+
+            <!-- Navigation -->
+            <VBox spacing="8.0" fx:id="navBox">
+                <HBox fx:id="homeNav" alignment="CENTER_LEFT" spacing="12.0" styleClass="nav-item, nav-item-active">
+                    <Label text="Home" styleClass="nav-text"/>
+                </HBox>
+                <HBox fx:id="pomodoroNav" alignment="CENTER_LEFT" spacing="12.0" styleClass="nav-item">
+                    <Label text="Pomodoro" styleClass="nav-text"/>
+                </HBox>
+                <HBox fx:id="taskNav" alignment="CENTER_LEFT" spacing="12.0" styleClass="nav-item">
+                    <Label text="Tasks" styleClass="nav-text"/>
+                </HBox>
+                <HBox fx:id="settingsNav" alignment="CENTER_LEFT" spacing="12.0" styleClass="nav-item">
+                    <Label text="Settings" styleClass="nav-text"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </left>
+
+    <!-- Main Content -->
+    <center>
+        <ScrollPane fx:id="contentPane"
+                    fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    style="-fx-background-color: -color-bg;">
+        </ScrollPane>
+    </center>
+</BorderPane>
+
