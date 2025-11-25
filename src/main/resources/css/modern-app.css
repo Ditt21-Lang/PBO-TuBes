@@ -76,10 +76,16 @@
     -fx-text-fill: -color-text-dark;
 }
 
-.header-subtitle {
+.header-subtitle, .pomodoro-status-label {
     -fx-font-size: 14px;
     -fx-text-fill: -color-text-muted;
 }
+
+.pomodoro-status-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: 500;
+}
+
 
 .search-field {
     -fx-background-radius: 8px; /* rounded-lg */
@@ -122,6 +128,16 @@
     -fx-background-color: #F8FAFC; /* slate-50 */
     -fx-border-color: #CBD5E1; /* slate-300 */
 }
+
+.mode-toggle-button.toggle-button:selected {
+    -fx-background-color: -color-accent;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+}
+.mode-toggle-button.toggle-button:selected:hover {
+    -fx-background-color: -color-accent-hover;
+}
+
 
 
 /* --- Cards --- */
