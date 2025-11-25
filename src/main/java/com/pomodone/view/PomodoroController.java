@@ -1,5 +1,6 @@
 package com.pomodone.view;
 
+import com.pomodone.facade.PomodoroFacade;
 import com.pomodone.model.pomodoro.PomodoroSettings;
 import com.pomodone.service.PomodoroService;
 import com.pomodone.strategy.pomodoro.ClassicPomodoroStrategy;
@@ -46,7 +47,7 @@ public class PomodoroController {
     @FXML private Label longBreakErrorLabel;
     @FXML private Label roundsErrorLabel;
 
-    private PomodoroService pomodoroService;
+    private PomodoroFacade pomodoroFacade;
 
     // buat validasi
     private final BooleanProperty isFocusValid = new SimpleBooleanProperty(true);
@@ -56,28 +57,28 @@ public class PomodoroController {
 
     @FXML
     public void initialize() {
-        this.pomodoroService = PomodoroService.getInstance();
-        bindUIToService();
+        this.pomodoroFacade = new PomodoroFacade();
+        bindUIToFacade();
         setupActionHandlers();
         setupValidationListeners();
         updateSettingsView(PomodoroService.PomodoroMode.CLASSIC);
     }
 
-    private void bindUIToService() {
+    private void bindUIToFacade() {
         // sambungin tampilan ke service
-        statusLabel.textProperty().bind(pomodoroService.statusStringProperty());
-        hoursLabel.textProperty().bind(pomodoroService.hoursProperty());
-        minutesLabel.textProperty().bind(pomodoroService.minutesProperty());
-        secondsLabel.textProperty().bind(pomodoroService.secondsProperty());
-        progressBar.progressProperty().bind(pomodoroService.progressProperty());
+        statusLabel.textProperty().bind(pomodoroFacade.statusStringProperty());
+        hoursLabel.textProperty().bind(pomodoroFacade.hoursProperty());
+        minutesLabel.textProperty().bind(pomodoroFacade.minutesProperty());
+        secondsLabel.textProperty().bind(pomodoroFacade.secondsProperty());
+        progressBar.progressProperty().bind(pomodoroFacade.progressProperty());
         
         // atur visibility jam
-        hoursGroup.visibleProperty().bind(pomodoroService.showHoursProperty());
-        hoursGroup.managedProperty().bind(pomodoroService.showHoursProperty());
-        separatorLabel1.visibleProperty().bind(pomodoroService.showHoursProperty());
-        separatorLabel1.managedProperty().bind(pomodoroService.showHoursProperty());
+        hoursGroup.visibleProperty().bind(pomodoroFacade.showHoursProperty());
+        hoursGroup.managedProperty().bind(pomodoroFacade.showHoursProperty());
+        separatorLabel1.visibleProperty().bind(pomodoroFacade.showHoursProperty());
+        separatorLabel1.managedProperty().bind(pomodoroFacade.showHoursProperty());
 
-        pomodoroService.timerStateProperty().addListener((obs, oldState, newState) -> {
+        pomodoroFacade.timerStateProperty().addListener((obs, oldState, newState) -> {
             boolean isStopped = newState == PomodoroService.TimerState.STOPPED;
             modeSelectionBox.setDisable(!isStopped);
             inputFieldsGridPane.setDisable(!isStopped);
@@ -98,8 +99,8 @@ public class PomodoroController {
     }
 
     private void setupActionHandlers() {
-        startButton.setOnAction(event -> pomodoroService.handleStartPause());
-        stopButton.setOnAction(event -> pomodoroService.stopAndResetTimer());
+        startButton.setOnAction(event -> pomodoroFacade.handleStartPause());
+        stopButton.setOnAction(event -> pomodoroFacade.stopAndResetTimer());
 
         modeToggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
             if (newToggle == null && oldToggle != null) {
@@ -107,10 +108,10 @@ public class PomodoroController {
             }
             if (newToggle == classicModeButton) {
                 updateSettingsView(PomodoroService.PomodoroMode.CLASSIC);
-                pomodoroService.selectMode(PomodoroService.PomodoroMode.CLASSIC);
+                pomodoroFacade.selectMode(PomodoroService.PomodoroMode.CLASSIC);
             } else if (newToggle == intenseModeButton) {
                 updateSettingsView(PomodoroService.PomodoroMode.INTENSE);
-                pomodoroService.selectMode(PomodoroService.PomodoroMode.INTENSE);
+                pomodoroFacade.selectMode(PomodoroService.PomodoroMode.INTENSE);
             } else if (newToggle == customModeButton) {
                 updateSettingsView(PomodoroService.PomodoroMode.CUSTOM);
                 validateAllCustomFields(); // validasi sekali pas ganti
@@ -239,7 +240,7 @@ public class PomodoroController {
                 int shortBreakMin = Integer.parseInt(customShortBreakField.getText());
                 int longBreakMin = Integer.parseInt(customLongBreakField.getText());
                 int rounds = Integer.parseInt(customRoundsField.getText());
-                pomodoroService.applyCustomSettings(focusMin, shortBreakMin, longBreakMin, rounds);
+                pomodoroFacade.applyCustomSettings(focusMin, shortBreakMin, longBreakMin, rounds);
             } catch (NumberFormatException e) {
                 System.err.println("Invalid custom settings input despite validation.");
             }
