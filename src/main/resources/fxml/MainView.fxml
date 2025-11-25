@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="720.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <top>
+        <VBox spacing="10">
+            <Label text="Pomodone Dashboard">
+                <font>
+                    <Font name="System Bold" size="26"/>
+                </font>
+            </Label>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField promptText="Nama Pengguna" text="Guest User" prefWidth="220"/>
+                <Button text="Simpan Nama" />
+            </HBox>
+        </VBox>
+    </top>
+
+    <left>
+        <VBox spacing="12">
+            <Label text="Semua Tugas">
+                <font>
+                    <Font name="System Bold" size="18"/>
+                </font>
+            </Label>
+            <ListView prefWidth="280">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Belajar Polimorfisme - SEDANG"/>
+                        <String fx:value="UI Mockup Pomodoro - MUDAH"/>
+                        <String fx:value="Refactor Timer Engine - SULIT (TERLAMBAT)"/>
+                        <String fx:value="Publikasi Release Alpha - SEDANG"/>
+                    </FXCollections>
+                </items>
+            </ListView>
+            <Button text="+ Tambah Tugas" maxWidth="Infinity"/>
+        </VBox>
+    </left>
+
+    <center>
+        <VBox spacing="12">
+            <Label text="Detail Tugas">
+                <font>
+                    <Font name="System Bold" size="18"/>
+                </font>
+            </Label>
+            <Label text="Belajar Polimorfisme">
+                <font>
+                    <Font name="System Bold" size="22"/>
+                </font>
+            </Label>
+            <VBox spacing="4">
+                <Label text="Kesulitan: SEDANG"/>
+                <Label text="Status: BELUM_SELESAI"/>
+                <Label text="Tenggat: 12 Mei 2025 14:00"/>
+            </VBox>
+            <Separator/>
+            <TextArea prefRowCount="8" wrapText="true" editable="false">
+                <text>
+                    Siapkan contoh kode polimorfisme untuk presentasi OOP. Gunakan contoh hewan dan kendaraan.
+                </text>
+            </TextArea>
+            <VBox spacing="8">
+                <Button text="Tandai Selesai" maxWidth="Infinity"/>
+                <Button text="Tandai Belum Selesai" maxWidth="Infinity"/>
+            </VBox>
+        </VBox>
+    </center>
+
+    <right>
+        <VBox spacing="12">
+            <Label text="Pomodoro">
+                <font>
+                    <Font name="System Bold" size="18"/>
+                </font>
+            </Label>
+            <Label text="Fokus ke: Belajar Polimorfisme"/>
+            <Label text="25:00">
+                <font>
+                    <Font name="System Bold" size="48"/>
+                </font>
+            </Label>
+            <ProgressBar prefWidth="240" progress="0.25"/>
+            <VBox spacing="8">
+                <Button text="Mulai Fokus" maxWidth="Infinity"/>
+                <Button text="Mulai Istirahat" maxWidth="Infinity"/>
+                <Button text="Reset" maxWidth="Infinity"/>
+            </VBox>
+        </VBox>
+    </right>
+
+    <bottom>
+        <HBox spacing="20" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="20"/>
+            </padding>
+            <Label text="DB belum dihubungkan (mock data)"/>
+            <Separator prefWidth="50"/>
+            <Label text="Status TERLAMBAT muncul otomatis saat melewati tenggat."/>
+        </HBox>
+    </bottom>
+</BorderPane>

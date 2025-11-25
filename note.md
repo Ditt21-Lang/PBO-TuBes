@@ -101,3 +101,4 @@
 - repository: satu-satunya lapisan yang bicara ke PostgreSQL menggunakan DatabaseConfig.
 - model: objek yang dipakai bersama oleh service, facade, view (data task/pomodoro/user). Repository mengembalikan/menerima model ini.
 - event/strategy/util: pelengkap—event untuk notifikasi antar komponen, strategy untuk variasi algoritma (sorting task, mode pomodoro), util untuk helper umum.
+
