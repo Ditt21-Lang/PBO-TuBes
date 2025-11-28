@@ -1,5 +1,7 @@
 package com.pomodone.service;
 
+import java.time.LocalDateTime;
+
 import com.pomodone.model.task.Task;
 import com.pomodone.model.task.TaskDifficulty;
 import com.pomodone.model.task.TaskStatus;
@@ -11,10 +13,10 @@ import java.util.List;
 import java.util.Optional;
 
 public class TaskService {
-    private final TaskRepository taskrepository;
+    private final TaskRepository taskRepository;
 
     public TaskService() {
-        this.taskrepository = new TaskRepository();
+        this.taskRepository = new TaskRepository();
     }
 
     public void createNewTask(String title, String description, LocalDateTime duedate, TaskDifficulty difficulty) {
@@ -30,15 +32,47 @@ public class TaskService {
                          .status(TaskStatus.BELUM_SELESAI)
                          .build();
         
-        taskrepository.save(newTask);
+        taskRepository.save(newTask);
     }
 
     public Task getTaskDetail(String title) {
-        return taskrepository.findByTitle(title)
+        return taskRepository.findByTitle(title)
                 .orElseThrow(() -> new IllegalArgumentException("Tugas tidak ditemukan: " + title));
     }
 
     public List<Task> getAllTasks() {
-        return taskrepository.findAll();
+        return taskRepository.findAll();
     }
+
+    public void deleteTask (int id){
+        if (id <= 0){
+            throw new IllegalArgumentException ("Judul tugas tidak ditemukan. Gagal menghapus tugas!");
+        } 
+
+        taskRepository.delete(id);
+    }
+
+    public void updateTask(long id, String newTitle, String newDescription,
+                       LocalDateTime newDueDate, TaskDifficulty newDifficulty,
+                       TaskStatus newStatus) {
+   
+        Task existingTask = taskRepository.findById(id);
+        if (existingTask == null) {
+            throw new IllegalArgumentException("Task dengan ID " + id + " tidak ditemukan!");
+        }
+
+        Task updateRequest = Task.builder()
+                .id(id)
+                .title(newTitle)                
+                .description(newDescription)    
+                .dueDate(newDueDate)            
+                .difficulty(newDifficulty)      
+                .status(newStatus)              
+                .build();
+
+        Task updatedTask = existingTask.withUpdatedFields(updateRequest);
+
+        taskRepository.update(updatedTask);
+    }
+
 }
