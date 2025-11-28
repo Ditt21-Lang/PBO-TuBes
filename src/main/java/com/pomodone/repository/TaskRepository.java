@@ -1,5 +1,12 @@
 package com.pomodone.repository;
 
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+
 import com.pomodone.config.DatabaseConfig;
 import com.pomodone.model.task.Task;
 import com.pomodone.model.task.TaskDifficulty;
@@ -11,6 +18,35 @@ import java.util.List;
 import java.util.Optional;
 
 public class TaskRepository {
+
+    public Task findById(long id) {
+        String sql = "SELECT * FROM tasks WHERE id = ?";
+
+        try (Connection conn = DatabaseConfig.getInstance().getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, id);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Task.builder()
+                            .id(rs.getLong("id"))
+                            .title(rs.getString("judul_tugas"))
+                            .description(rs.getString("deskripsi_tugas"))
+                            .dueDate(rs.getTimestamp("tenggat_tugas").toLocalDateTime())
+                            .difficulty(TaskDifficulty.valueOf(rs.getString("tingkat_kesulitan")))
+                            .status(TaskStatus.valueOf(rs.getString("status")))
+                            .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
+                            .updatedAt(rs.getTimestamp("updated_at").toLocalDateTime())
+                            .build();
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     
     public void save(Task task) {
         String sql = "INSERT INTO tasks (judul_tugas, deskripsi_tugas, tenggat_tugas, tingkat_kesulitan, status, created_at, updated_at)" +
@@ -93,4 +129,59 @@ public class TaskRepository {
 
         return taskList;
     }
+    
+    public void delete (int id){
+        String query = "DELETE FROM tasks WHERE id = ?";
+
+         try (Connection conn = DatabaseConfig.getInstance().getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+
+            System.out.println("Task dengan nama Berhasil Dihapus");
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    public void update(Task updatedTask) {
+
+        // 1. Ambil data lama dari database
+        Task oldTask = findById(updatedTask.getId());
+        if (oldTask == null) {
+            throw new IllegalArgumentException("Task dengan ID " + updatedTask.getId() + " tidak ditemukan");
+        }
+
+        // 2. Gabungkan field lama + baru
+        Task mergedTask = oldTask.withUpdatedFields(updatedTask);
+
+        
+        String sql = """
+            UPDATE tasks SET 
+                judul_tugas = ?, 
+                deskripsi_tugas = ?, 
+                tenggat_tugas = ?, 
+                tingkat_kesulitan = ?::task_difficulty, 
+                status = ?::task_status, 
+                updated_at = ?
+            WHERE id = ?
+        """;
+
+        try (Connection conn = DatabaseConfig.getInstance().getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, mergedTask.getTitle());
+            stmt.setString(2, mergedTask.getDescription());
+            stmt.setTimestamp(3, Timestamp.valueOf(mergedTask.getDueDate()));
+            stmt.setString(4, mergedTask.getDifficulty().name());
+            stmt.setString(5, mergedTask.getStatus().name());
+            stmt.setTimestamp(6, Timestamp.valueOf(mergedTask.getUpdatedAt()));
+            stmt.setLong(7, mergedTask.getId());
+
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
