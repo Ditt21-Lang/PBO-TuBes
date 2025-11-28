@@ -1,13 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/21"
-      xmlns:fx="http://javafx.com/fxml/1"
-      spacing="10"
-      styleClass="main-content">
-    <Label text="Tasks" styleClass="header-title"/>
-    <Label text="This is a placeholder for the Task Manager." styleClass="header-subtitle"/>
+<VBox spacing="20.0" styleClass="main-content" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pomodone.view.TaskListController">
+
+    <VBox spacing="4.0">
+        <Label styleClass="header-title" text="Tasks"/>
+        <Label styleClass="header-subtitle" text="Manage your daily goals."/>
+    </VBox>
+
+    <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+        
+        <VBox styleClass="task-card" spacing="12.0" prefWidth="320.0" HBox.hgrow="NEVER">
+             <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+             </padding>
+             
+             <Label styleClass="task-card-header" text="My List"/>
+             <ListView fx:id="taskListView" styleClass="list-cell" VBox.vgrow="ALWAYS"/>
+        </VBox>
+
+        <VBox fx:id="detailContainer" styleClass="task-card" spacing="16.0" HBox.hgrow="ALWAYS" visible="false">
+            <padding>
+                <Insets top="30" right="30" bottom="30" left="30"/>
+            </padding>
+
+            <VBox spacing="8.0">
+                <Label fx:id="detailTitleLabel" styleClass="header-title" style="-fx-font-size: 24px;" wrapText="true" text="Judul Tugas"/>
+                
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <Label fx:id="detailStatusLabel" style="-fx-text-fill: -color-accent; -fx-font-weight: bold; -fx-font-size: 13px;" text="IN_PROGRESS"/>
+                    
+                    <Label text="•" style="-fx-text-fill: -color-text-muted;"/>
+                    
+                    <Label text="Due date:" style="-fx-text-fill: -color-text-muted; -fx-font-size: 13px;"/>
+                    <Label fx:id="detailDeadlineLabel" style="-fx-text-fill: -color-text-dark; -fx-font-size: 13px;" text="20 Oct 2024"/>
+                </HBox>
+            </VBox>
+
+            <Separator opacity="0.5"/>
+
+            <VBox spacing="8.0" VBox.vgrow="ALWAYS">
+                <Label styleClass="settings-label" text="Description"/>
+                <TextArea fx:id="detailDescriptionArea" styleClass="settings-field" editable="false" wrapText="true" VBox.vgrow="ALWAYS"/>
+            </VBox>
+        </VBox>
+
+    </HBox>
 </VBox>
