@@ -2,13 +2,16 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
 <VBox spacing="20.0" styleClass="main-content" 
       xmlns="http://javafx.com/javafx/21" 
@@ -22,19 +25,50 @@
 
     <HBox spacing="20.0" VBox.vgrow="ALWAYS">
         
-        <VBox styleClass="task-card" spacing="12.0" prefWidth="320.0" HBox.hgrow="NEVER">
-             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
-             </padding>
-             
-             <HBox alignment="CENTER_LEFT">
-                 <Label styleClass="task-card-header" text="My List"/>
-                 <Region HBox.hgrow="ALWAYS"/>
-                 <Button fx:id="addTaskButton" text="+ New" styleClass="primary-button" style="-fx-font-size: 12px; -fx-padding: 5 10;"/>
-             </HBox>
+        <StackPane styleClass="task-card" prefWidth="360.0" HBox.hgrow="NEVER">
+            <VBox spacing="12.0">
+                 <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                 </padding>
+                 
+                 <HBox alignment="CENTER_LEFT" spacing="8.0">
+                     <Label styleClass="task-card-header" text="My List"/>
+                     <Region HBox.hgrow="ALWAYS"/>
+                     <Button fx:id="viewSettingsButton" text="☰" styleClass="secondary-button icon-button"/>
+                     <Button fx:id="addTaskButton" text="+ New" styleClass="primary-button" style="-fx-font-size: 12px; -fx-padding: 5 10;"/>
+                 </HBox>
 
-             <ListView fx:id="taskListView" styleClass="list-cell" VBox.vgrow="ALWAYS"/>
-        </VBox>
+                 <ListView fx:id="taskListView" styleClass="task-list" VBox.vgrow="ALWAYS"/>
+            </VBox>
+
+            <VBox fx:id="filterPanel" spacing="10.0" visible="false" managed="false"
+                  styleClass="floating-panel" StackPane.alignment="TOP_RIGHT">
+                <StackPane.margin>
+                    <Insets top="12" right="12" />
+                </StackPane.margin>
+                <HBox alignment="CENTER_LEFT" spacing="6.0">
+                    <Label text="Pengaturan tampilan" styleClass="floating-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="closeFilterPanelButton" text="X" styleClass="ghost-icon-button"/>
+                </HBox>
+                <VBox spacing="8.0">
+                    <Label text="Urutkan menurut" styleClass="floating-title"/>
+                    <RadioButton fx:id="sortNameAscRadio" text="Nama: A ke Z" />
+                    <RadioButton fx:id="sortNameDescRadio" text="Nama: Z ke A" />
+                    <RadioButton fx:id="sortDueSoonRadio" text="Tgl: Terdekat - Terjauh" />
+                    <RadioButton fx:id="sortDueLateRadio" text="Tgl: Terjauh - Terdekat" />
+                    <RadioButton fx:id="sortDifficultyDescRadio" text="Kesulitan: Tinggi - Rendah" />
+                </VBox>
+                <Separator/>
+                <VBox spacing="8.0">
+                    <Label text="Filter status" styleClass="floating-title"/>
+                    <CheckBox fx:id="pendingCheckBox" text="Belum selesai" styleClass="pill-checkbox"/>
+                    <CheckBox fx:id="overdueCheckBox" text="Terlambat" styleClass="pill-checkbox"/>
+                    <CheckBox fx:id="doneCheckBox" text="Selesai" styleClass="pill-checkbox"/>
+                    <Label text="Default: Belum selesai + Terlambat" styleClass="helper-text"/>
+                </VBox>
+            </VBox>
+        </StackPane>
 
         <VBox fx:id="detailContainer" styleClass="task-card" spacing="16.0" HBox.hgrow="ALWAYS" visible="false">
             <padding>

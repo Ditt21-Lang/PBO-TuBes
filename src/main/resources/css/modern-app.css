@@ -244,3 +244,86 @@
     -fx-font-size: 14px;
     -fx-text-fill: -color-text-muted;
 }
+
+/* --- Filters & Sort --- */
+.icon-button {
+    -fx-padding: 8px 12px;
+    -fx-background-color: transparent;
+    -fx-border-color: -color-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-text-fill: -color-secondary-text;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+}
+.icon-button:hover {
+    -fx-background-color: -color-nav-hover-bg;
+}
+.ghost-icon-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -color-secondary-text;
+    -fx-cursor: hand;
+    -fx-font-weight: 700;
+}
+.ghost-icon-button:hover {
+    -fx-text-fill: -color-text-dark;
+}
+.chip-combo {
+    -fx-background-color: #F8FAFC;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1px;
+    -fx-padding: 6px 10px;
+    -fx-text-fill: -color-text-main;
+}
+.chip-combo:focused {
+    -fx-border-color: -color-accent;
+    -fx-border-width: 1.5px;
+}
+.floating-panel {
+    -fx-background-color: -color-card;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 16, 0, 0, 8);
+    -fx-padding: 12px;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1px;
+}
+.floating-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -color-text-dark;
+}
+.pill-checkbox {
+    -fx-padding: 6px 10px;
+    -fx-background-color: #F8FAFC;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1px;
+}
+.pill-checkbox:selected {
+    -fx-background-color: rgba(6, 182, 212, 0.12);
+    -fx-border-color: -color-accent;
+    -fx-text-fill: -color-text-dark;
+}
+.helper-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-text-muted;
+}
+.task-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 12px 10px;
+    -fx-text-fill: -color-text-dark;
+}
+.task-list .list-cell:filled:hover {
+    -fx-background-color: -color-nav-hover-bg;
+}
+.task-list .list-cell:filled:selected {
+    -fx-background-color: rgba(6, 182, 212, 0.18);
+    -fx-text-fill: -color-text-dark;
+    -fx-font-weight: 600;
+}
