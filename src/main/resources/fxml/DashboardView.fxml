@@ -11,12 +11,12 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="40.0" styleClass="main-content" xmlns="http://javafx.com/javafx/21.0" xmlns:fx="http://javafx.com/fxml/1">
+<VBox spacing="40.0" styleClass="main-content" xmlns="http://javafx.com/javafx/21.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pomodone.view.DashboardController">
     <!-- Header -->
     <HBox alignment="CENTER_LEFT" spacing="16.0">
         <VBox>
             <Label styleClass="header-title" text="Dashboard"/>
-            <Label styleClass="header-subtitle" text="Welcome back, let's be productive!"/>
+            <Label fx:id="headerSubtitle" styleClass="header-subtitle" text="Welcome back, let's be productive!"/>
         </VBox>
         <Region HBox.hgrow="ALWAYS"/>
         <HBox alignment="CENTER_LEFT" spacing="16.0">
@@ -37,46 +37,24 @@
         </rowConstraints>
         <VBox styleClass="stat-card" GridPane.columnIndex="0">
             <Label styleClass="stat-card-title" text="Today's Sessions"/>
-            <Label styleClass="stat-card-value" text="3 / 5"/>
+            <Label fx:id="dailyPomodoroLabel" styleClass="stat-card-value" text="0 / 0"/>
         </VBox>
         <VBox styleClass="stat-card" GridPane.columnIndex="1">
             <Label styleClass="stat-card-title" text="Active Tasks"/>
-            <Label styleClass="stat-card-value" text="12"/>
+            <Label fx:id="activeTasksLabel" styleClass="stat-card-value" text="0"/>
         </VBox>
         <VBox styleClass="stat-card" GridPane.columnIndex="2">
             <Label styleClass="stat-card-title" text="Productivity"/>
-            <Label styleClass="stat-card-value" text="82%"/>
+            <Label fx:id="productivityLabel" styleClass="stat-card-value" text="0%"/>
         </VBox>
     </GridPane>
 
     <!-- Task List -->
     <VBox spacing="12.0" styleClass="task-card">
+        <VBox.margin>
+            <Insets top="12" bottom="12"/>
+        </VBox.margin>
         <Label styleClass="task-card-header" text="Priority Tasks"/>
-        <VBox spacing="4.0">
-            <!-- Task Item 1 -->
-            <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="task-item">
-                <VBox HBox.hgrow="ALWAYS">
-                    <Label styleClass="task-item-title" text="Fix Pomodoro Timer"/>
-                    <Label styleClass="task-item-priority-high" text="High Priority"/>
-                </VBox>
-                <Label styleClass="task-item-due-date" text="Due: Tomorrow"/>
-            </HBox>
-            <!-- Task Item 2 -->
-            <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="task-item">
-                <VBox HBox.hgrow="ALWAYS">
-                    <Label styleClass="task-item-title" text="UI Iteration"/>
-                    <Label styleClass="task-item-priority-medium" text="Medium Priority"/>
-                </VBox>
-                <Label styleClass="task-item-due-date" text="Due: 3 days"/>
-            </HBox>
-            <!-- Task Item 3 -->
-            <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="task-item">
-                <VBox HBox.hgrow="ALWAYS">
-                    <Label styleClass="task-item-title" text="Sync Calendar"/>
-                    <Label styleClass="task-item-priority-low" text="Low Priority"/>
-                </VBox>
-                <Label styleClass="task-item-due-date" text="Due: Next week"/>
-            </HBox>
-        </VBox>
+        <VBox fx:id="priorityTasksBox" spacing="4.0"/>
     </VBox>
 </VBox>

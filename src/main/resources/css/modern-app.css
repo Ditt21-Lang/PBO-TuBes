@@ -310,6 +310,19 @@
     -fx-border-color: -color-accent;
     -fx-text-fill: -color-text-dark;
 }
+.pill-checkbox .box {
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-color: #CBD5E1;
+    -fx-border-width: 1px;
+}
+.pill-checkbox:selected .box {
+    -fx-background-color: -color-accent;
+    -fx-border-color: -color-accent;
+}
+.pill-checkbox:selected .mark {
+    -fx-background-color: white;
+}
 .helper-text {
     -fx-font-size: 12px;
     -fx-text-fill: -color-text-muted;
@@ -326,4 +339,73 @@
     -fx-background-color: rgba(6, 182, 212, 0.18);
     -fx-text-fill: -color-text-dark;
     -fx-font-weight: 600;
+}
+.task-list .scroll-bar:vertical {
+    -fx-pref-width: 10px;
+    -fx-background-color: transparent;
+}
+.task-list .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+.task-list .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(6, 182, 212, 0.35);
+    -fx-background-radius: 6px;
+}
+.task-list .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(6, 182, 212, 0.55);
+}
+.pill-radio {
+    -fx-padding: 6px 10px;
+    -fx-background-color: #F8FAFC;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1px;
+    -fx-text-fill: -color-text-main;
+}
+.pill-radio:selected {
+    -fx-background-color: rgba(6, 182, 212, 0.12);
+    -fx-border-color: -color-accent;
+}
+.pill-radio .radio {
+    -fx-background-color: transparent;
+    -fx-border-color: #CBD5E1;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 999;
+    -fx-padding: 3px;
+}
+.pill-radio:selected .radio {
+    -fx-border-color: -color-accent;
+}
+.pill-radio:selected .dot {
+    -fx-background-color: -color-accent;
+}
+
+.sort-button {
+    -fx-background-color: #fdfdfd;
+    -fx-text-fill: linear-gradient(to right, #06B6D4, #0EA5E9);
+    -fx-font-weight: 700;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-padding: 8px 14px;
+    -fx-border-color: linear-gradient(to right, #06B6D4, #0EA5E9);
+    -fx-border-width: 1.5px;
+    -fx-cursor: hand;
+}
+.sort-button:hover {
+    -fx-background-color: #BAE6FD;
+    -fx-text-fill: #0EA5E9;
+}
+.primary-cta {
+    -fx-background-color: linear-gradient(to right, #06B6D4, #0EA5E9);
+    -fx-text-fill: white;
+    -fx-font-weight: 800;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-letter-spacing: 0.2px;
+}
+.primary-cta:hover {
+    -fx-background-color: linear-gradient(to right, #0891B2, #0284C7);
 }

@@ -9,8 +9,13 @@ import com.pomodone.util.SortDirection;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import java.time.LocalDate;
@@ -20,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 public class TaskListController {
 
@@ -47,6 +53,7 @@ public class TaskListController {
     private TaskService taskService;
     private final CollectionViewProcessor<Task> viewProcessor = new CollectionViewProcessor<>();
     private final DateTimeFormatter deadlineFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, HH:mm");
+    private final DateTimeFormatter listDeadlineFormatter = DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy HH:mm", new Locale("id", "ID"));
     private List<Task> allTasks = new ArrayList<>();
 
     @FXML
@@ -76,26 +83,96 @@ public class TaskListController {
     }
 
     private void setupListViewCellFactory() {
-        taskListView.setCellFactory(listView -> new ListCell<>() {
-            @Override
-            protected void updateItem(Task task, boolean empty) {
-                super.updateItem(task, empty);
-                if (empty || task == null) {
-                    setText(null);
-                } else {
-                    setText(formatTaskLabel(task));
-                }
-            }
-        });
+        taskListView.setCellFactory(listView -> new DashboardTaskCell());
     }
 
-    private String formatTaskLabel(Task task) {
-        String statusTag = switch (task.getStatus()) {
-            case TERLAMBAT -> "[Late]";
-            case SELESAI -> "[Done]";
-            default -> "[Open]";
+    private class DashboardTaskCell extends ListCell<Task> {
+        private final Label titleLabel = new Label();
+        private final Label difficultyLabel = new Label();
+        private final Label dueDateLabel = new Label();
+        private final Region spacer = new Region();
+        private final HBox card;
+
+        DashboardTaskCell() {
+            titleLabel.getStyleClass().add("task-item-title");
+            difficultyLabel.getStyleClass().add("task-item-priority-low");
+            dueDateLabel.getStyleClass().add("task-item-due-date");
+
+            VBox infoBox = new VBox(titleLabel, difficultyLabel);
+            infoBox.setSpacing(4);
+            HBox.setHgrow(infoBox, Priority.ALWAYS);
+
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            card = new HBox(infoBox, spacer, dueDateLabel);
+            card.setSpacing(8);
+            card.setAlignment(Pos.BOTTOM_LEFT);
+            card.setPadding(new Insets(12));
+            card.getStyleClass().add("task-item");
+        }
+
+        @Override
+        protected void updateItem(Task task, boolean empty) {
+            super.updateItem(task, empty);
+            if (empty || task == null) {
+                setText(null);
+                setGraphic(null);
+                return;
+            }
+
+            titleLabel.setText(truncateTitle(task.getTitle(), 38));
+            difficultyLabel.setText(formatDifficultyLabel(task.getDifficulty()));
+            updateDifficultyStyle(task.getDifficulty());
+            dueDateLabel.setText(formatDueDate(task.getDueDate()));
+            updateDueDateStyle(task);
+
+            setText(null);
+            setGraphic(card);
+        }
+
+        private void updateDifficultyStyle(TaskDifficulty difficulty) {
+            difficultyLabel.getStyleClass().removeAll(
+                    "task-item-priority-high",
+                    "task-item-priority-medium",
+                    "task-item-priority-low"
+            );
+            difficultyLabel.getStyleClass().add(resolveDifficultyStyle(difficulty));
+        }
+
+        private void updateDueDateStyle(Task task) {
+            // reset to base style
+            dueDateLabel.setStyle("");
+            if (task.getStatus() == TaskStatus.TERLAMBAT) {
+                dueDateLabel.setStyle("-fx-text-fill: #DC2626;"); // red-600
+            }
+        }
+    }
+
+    private String formatDifficultyLabel(TaskDifficulty difficulty) {
+        return switch (difficulty) {
+            case SULIT -> "Sulit";
+            case SEDANG -> "Sedang";
+            case MUDAH -> "Mudah";
         };
-        return statusTag + " " + task.getTitle();
+    }
+
+    private String resolveDifficultyStyle(TaskDifficulty difficulty) {
+        return switch (difficulty) {
+            case SULIT -> "task-item-priority-high";
+            case SEDANG -> "task-item-priority-medium";
+            case MUDAH -> "task-item-priority-low";
+        };
+    }
+
+    private String formatDueDate(LocalDateTime dueDate) {
+        if (dueDate == null) return "";
+        return "Due: " + dueDate.format(listDeadlineFormatter);
+    }
+
+    private String truncateTitle(String title, int maxChars) {
+        if (title == null) return "";
+        if (title.length() <= maxChars) return title;
+        return title.substring(0, maxChars - 3) + "...";
     }
 
     private void setupFilterControls() {
@@ -215,7 +292,14 @@ public class TaskListController {
         descField.setPrefHeight(100);
 
         DatePicker datePicker = new DatePicker();
-        datePicker.setValue(LocalDate.now());
+        datePicker.setPromptText("dd/MM/yyyy");
+
+        Spinner<Integer> hourSpinner = new Spinner<>(new IntegerSpinnerValueFactory(0, 23, 23));
+        Spinner<Integer> minuteSpinner = new Spinner<>(new IntegerSpinnerValueFactory(0, 59, 59));
+        hourSpinner.setEditable(false);
+        minuteSpinner.setEditable(false);
+        hourSpinner.disableProperty().bind(datePicker.valueProperty().isNull());
+        minuteSpinner.disableProperty().bind(datePicker.valueProperty().isNull());
 
         ComboBox<TaskDifficulty> difficultyBox = new ComboBox<>();
         difficultyBox.getItems().setAll(TaskDifficulty.values());
@@ -227,8 +311,11 @@ public class TaskListController {
         grid.add(descField, 1, 1);
         grid.add(new Label("Deadline:"), 0, 2);
         grid.add(datePicker, 1, 2);
-        grid.add(new Label("Difficulty:"), 0, 3);
-        grid.add(difficultyBox, 1, 3);
+        grid.add(new Label("Time:"), 0, 3);
+        HBox timeBox = new HBox(6, hourSpinner, new Label(":"), minuteSpinner);
+        grid.add(timeBox, 1, 3);
+        grid.add(new Label("Difficulty:"), 0, 4);
+        grid.add(difficultyBox, 1, 4);
 
         dialog.getDialogPane().setContent(grid);
 
@@ -241,8 +328,10 @@ public class TaskListController {
                 TaskDifficulty diff = difficultyBox.getValue();
                 
                 LocalDateTime dueDate = null;
-                if (datePicker.getValue() != null) {
-                    dueDate = datePicker.getValue().atTime(LocalTime.MAX); 
+                LocalDate selectedDate = datePicker.getValue();
+                if (selectedDate != null) {
+                    LocalTime time = LocalTime.of(hourSpinner.getValue(), minuteSpinner.getValue());
+                    dueDate = LocalDateTime.of(selectedDate, time);
                 }
 
                 try {

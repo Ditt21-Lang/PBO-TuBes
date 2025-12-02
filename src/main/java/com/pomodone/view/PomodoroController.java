@@ -1,11 +1,12 @@
 package com.pomodone.view;
 
 import com.pomodone.facade.PomodoroFacade;
+import com.pomodone.model.pomodoro.CustomPomodoroPreset;
 import com.pomodone.model.pomodoro.PomodoroSettings;
 import com.pomodone.service.PomodoroService;
+import com.pomodone.service.CustomPomodoroPresetService;
 import com.pomodone.strategy.pomodoro.ClassicPomodoroStrategy;
 import com.pomodone.strategy.pomodoro.IntensePomodoroStrategy;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -48,6 +49,7 @@ public class PomodoroController {
     @FXML private Label roundsErrorLabel;
 
     private PomodoroFacade pomodoroFacade;
+    private CustomPomodoroPresetService presetService;
 
     // buat validasi
     private final BooleanProperty isFocusValid = new SimpleBooleanProperty(true);
@@ -58,6 +60,8 @@ public class PomodoroController {
     @FXML
     public void initialize() {
         this.pomodoroFacade = new PomodoroFacade();
+        this.presetService = new CustomPomodoroPresetService();
+        loadCustomPresetDefaults();
         bindUIToFacade();
         setupActionHandlers();
         setupValidationListeners();
@@ -99,7 +103,17 @@ public class PomodoroController {
     }
 
     private void setupActionHandlers() {
-        startButton.setOnAction(event -> pomodoroFacade.handleStartPause());
+        startButton.setOnAction(event -> {
+            if (customModeButton.isSelected()) {
+                validateAllCustomFields();
+                if (!areAllCustomFieldsValid()) {
+                    return;
+                }
+                applyCustomSettings();
+                persistCustomPreset();
+            }
+            pomodoroFacade.handleStartPause();
+        });
         stopButton.setOnAction(event -> pomodoroFacade.stopAndResetTimer());
 
         modeToggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
@@ -198,6 +212,10 @@ public class PomodoroController {
         isLongBreakValid.set(validatePositiveInteger(customLongBreakField.getText(), customLongBreakField, longBreakErrorLabel, true));
         isRoundsValid.set(validatePositiveInteger(customRoundsField.getText(), customRoundsField, roundsErrorLabel, false));
     }
+
+    private boolean areAllCustomFieldsValid() {
+        return isFocusValid.get() && isShortBreakValid.get() && isLongBreakValid.get() && isRoundsValid.get();
+    }
     
     private void updateSettingsView(PomodoroService.PomodoroMode mode) {
         boolean isCustom = mode == PomodoroService.PomodoroMode.CUSTOM;
@@ -244,6 +262,33 @@ public class PomodoroController {
             } catch (NumberFormatException e) {
                 System.err.println("Invalid custom settings input despite validation.");
             }
+        }
+    }
+
+    private void persistCustomPreset() {
+        try {
+            int focusMin = Integer.parseInt(customFocusField.getText());
+            int shortBreakMin = Integer.parseInt(customShortBreakField.getText());
+            int longBreakMin = Integer.parseInt(customLongBreakField.getText());
+            int rounds = Integer.parseInt(customRoundsField.getText());
+            presetService.savePreset(focusMin, shortBreakMin, longBreakMin, rounds);
+        } catch (NumberFormatException ignored) {
+            // sudah divalidasi
+        }
+    }
+
+    private void loadCustomPresetDefaults() {
+        CustomPomodoroPreset preset = presetService.loadLatestPreset();
+        if (preset != null) {
+            customFocusField.setText(String.valueOf(preset.getFocusMinutes()));
+            customShortBreakField.setText(String.valueOf(preset.getShortBreakMinutes()));
+            customLongBreakField.setText(String.valueOf(preset.getLongBreakMinutes()));
+            customRoundsField.setText(String.valueOf(preset.getRounds()));
+        } else {
+            customFocusField.setText("25");
+            customShortBreakField.setText("5");
+            customLongBreakField.setText("15");
+            customRoundsField.setText("4");
         }
     }
 }

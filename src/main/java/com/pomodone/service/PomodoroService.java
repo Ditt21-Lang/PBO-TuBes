@@ -13,6 +13,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 
 import java.net.URL;
+import java.time.LocalDateTime;
 
 public class PomodoroService {
     private static PomodoroService instance;
@@ -29,6 +30,8 @@ public class PomodoroService {
     private PomodoroSettings settings;
     private int roundsCompleted = 0;
     private Media alarmSound;
+    private LocalDateTime sessionStartedAt;
+    private final PomodoroSessionService sessionService = new PomodoroSessionService();
 
     // Property yang bisa di-observe buat UI
     private final ReadOnlyStringWrapper hours = new ReadOnlyStringWrapper("00");
@@ -117,6 +120,7 @@ public class PomodoroService {
                 roundsCompleted = 0;
                 timeRemaining = settings.getFocusDuration();
                 currentSessionTotalDuration = timeRemaining;
+                sessionStartedAt = LocalDateTime.now();
             }
             timeline.play();
             timerState.set(TimerState.RUNNING);
@@ -133,6 +137,7 @@ public class PomodoroService {
             timeRemaining = settings.getFocusDuration();
             currentSessionTotalDuration = timeRemaining;
         }
+        sessionStartedAt = null;
         updateTimerLabels();
         updateStatusString();
         progress.set(0.0);
@@ -199,6 +204,8 @@ public class PomodoroService {
         // berhentiin timeline utama, timer bakal di 00:00
         timeline.stop();
 
+        logFocusCompletionIfNeeded();
+
         // mainin alarm, callback-nya bakal nyiapin dan mulai sesi berikutnya
         playAlarm(() -> {
             if (sessionType.get() == SessionType.FOCUS) {
@@ -215,6 +222,7 @@ public class PomodoroService {
                 timeRemaining = settings.getFocusDuration();
             }
             currentSessionTotalDuration = timeRemaining;
+            sessionStartedAt = sessionType.get() == SessionType.FOCUS ? LocalDateTime.now() : null;
             updateStatusString();
             updateTimerLabels();
 
@@ -266,5 +274,21 @@ public class PomodoroService {
                 break;
         }
         statusString.set(text);
+    }
+
+    private void logFocusCompletionIfNeeded() {
+        if (sessionType.get() != SessionType.FOCUS || sessionStartedAt == null) {
+            return;
+        }
+        LocalDateTime endedAt = LocalDateTime.now();
+        long durationSeconds = currentSessionTotalDuration != null
+                ? Math.max(0, currentSessionTotalDuration.toSeconds())
+                : 0;
+        sessionService.logCompletedSession(sessionStartedAt, endedAt, durationSeconds, pomodoroMode.get());
+        sessionStartedAt = null;
+    }
+
+    public PomodoroMode getCurrentMode() {
+        return pomodoroMode.get();
     }
 }

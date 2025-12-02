@@ -27,11 +27,12 @@ public class TaskRepository {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
+                    Timestamp due = rs.getTimestamp("tenggat_tugas");
                     return Task.builder()
                             .id(rs.getLong("id"))
                             .title(rs.getString("judul_tugas"))
                             .description(rs.getString("deskripsi_tugas"))
-                            .dueDate(rs.getTimestamp("tenggat_tugas").toLocalDateTime())
+                            .dueDate(due != null ? due.toLocalDateTime() : null)
                             .difficulty(TaskDifficulty.valueOf(rs.getString("tingkat_kesulitan")))
                             .status(TaskStatus.valueOf(rs.getString("status")))
                             .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
@@ -171,7 +172,8 @@ public class TaskRepository {
 
             stmt.setString(1, mergedTask.getTitle());
             stmt.setString(2, mergedTask.getDescription());
-            stmt.setTimestamp(3, Timestamp.valueOf(mergedTask.getDueDate()));
+            Timestamp dueTimestamp = mergedTask.getDueDate() != null ? Timestamp.valueOf(mergedTask.getDueDate()) : null;
+            stmt.setTimestamp(3, dueTimestamp);
             stmt.setString(4, mergedTask.getDifficulty().name());
             stmt.setString(5, mergedTask.getStatus().name());
             stmt.setTimestamp(6, Timestamp.valueOf(mergedTask.getUpdatedAt()));
@@ -182,6 +184,85 @@ public class TaskRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public int countActiveTasks() {
+        String sql = "SELECT COUNT(*) FROM tasks WHERE status <> 'SELESAI'";
+        try (Connection conn = DatabaseConfig.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int countCompletedTasks() {
+        String sql = "SELECT COUNT(*) FROM tasks WHERE status = 'SELESAI'";
+        try (Connection conn = DatabaseConfig.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int countCompletedOnTimeTasks() {
+        String sql = """
+            SELECT COUNT(*) FROM tasks
+            WHERE status = 'SELESAI'
+              AND (tenggat_tugas IS NULL OR updated_at <= tenggat_tugas)
+        """;
+        try (Connection conn = DatabaseConfig.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<Task> findTopByDueDate(int limit) {
+        String sql = """
+            SELECT * FROM tasks
+            WHERE status <> 'SELESAI'
+            ORDER BY tenggat_tugas ASC NULLS LAST, created_at DESC
+            LIMIT ?
+        """;
+        List<Task> result = new ArrayList<>();
+        try (Connection conn = DatabaseConfig.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, Math.max(1, limit));
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Timestamp due = rs.getTimestamp("tenggat_tugas");
+                    Task task = Task.builder()
+                            .id(rs.getLong("id"))
+                            .title(rs.getString("judul_tugas"))
+                            .description(rs.getString("deskripsi_tugas"))
+                            .dueDate(due != null ? due.toLocalDateTime() : null)
+                            .difficulty(TaskDifficulty.valueOf(rs.getString("tingkat_kesulitan")))
+                            .status(TaskStatus.valueOf(rs.getString("status")))
+                            .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
+                            .updatedAt(rs.getTimestamp("updated_at").toLocalDateTime())
+                            .build();
+                    result.add(task);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
 }
