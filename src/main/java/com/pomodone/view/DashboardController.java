@@ -6,6 +6,7 @@ import com.pomodone.service.TaskService;
 import com.pomodone.model.task.Task;
 import com.pomodone.model.task.TaskDifficulty;
 import com.pomodone.model.task.TaskStatus;
+import javafx.scene.control.TextField;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -24,6 +25,7 @@ public class DashboardController {
     @FXML private Label productivityLabel;
     @FXML private Label headerSubtitle;
     @FXML private VBox priorityTasksBox;
+    @FXML private TextField dashboardSearchField;
 
     private final DashboardStatsService statsService = new DashboardStatsService();
     private final TaskService taskService = new TaskService();
@@ -33,6 +35,7 @@ public class DashboardController {
     public void initialize() {
         loadStats();
         loadPriorityTasks();
+        setupSearchHandler();
     }
 
     private void loadStats() {
@@ -43,11 +46,24 @@ public class DashboardController {
         headerSubtitle.setText("Welcome back, let's be productive!");
     }
 
+    private void setupSearchHandler() {
+        if (dashboardSearchField == null) return;
+        dashboardSearchField.setOnAction(event -> triggerTaskListSearch());
+    }
+
+    private void triggerTaskListSearch() {
+        String query = dashboardSearchField.getText();
+        MainWindowController mainWindow = MainWindowController.getInstance();
+        if (mainWindow != null) {
+            mainWindow.navigateToTaskListWithSearch(query);
+        }
+    }
+
     private void loadPriorityTasks() {
         priorityTasksBox.getChildren().clear();
         List<Task> tasks = taskService.getTopByDueDate(5);
         if (tasks.isEmpty()) {
-            Label empty = new Label("Tidak ada tugas prioritas.");
+            Label empty = new Label("No priority tasks.");
             empty.getStyleClass().add("task-item-due-date");
             priorityTasksBox.getChildren().add(empty);
             return;

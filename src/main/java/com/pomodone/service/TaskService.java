@@ -21,7 +21,7 @@ public class TaskService {
 
     public void createNewTask(String title, String description, LocalDateTime duedate, TaskDifficulty difficulty) {
         if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Judul tugas tidak boleh kosong!");
+            throw new IllegalArgumentException("Task title cannot be empty!");
         }
 
         Task newTask = Task.builder()
@@ -50,7 +50,7 @@ public class TaskService {
 
     public void deleteTask (int id){
         if (id <= 0){
-            throw new IllegalArgumentException ("Judul tugas tidak ditemukan. Gagal menghapus tugas!");
+            throw new IllegalArgumentException ("Task title not found. Failed to delete task!");
         } 
 
         taskRepository.delete(id);

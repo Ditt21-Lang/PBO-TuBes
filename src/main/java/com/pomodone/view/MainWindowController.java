@@ -29,9 +29,11 @@ public class MainWindowController {
     private HBox settingsNav;
 
     private HBox activeNav;
+    private static MainWindowController instance;
 
     @FXML
     public void initialize() {
+        instance = this;
         // Set nav item yang aktif dan load tampilan awal
         activeNav = homeNav;
         navigateTo("DashboardView.fxml");
@@ -60,7 +62,7 @@ public class MainWindowController {
             contentPane.setContent(view);
         } catch (IOException | NullPointerException e) {
             e.printStackTrace();
-            Label errorLabel = new Label("Error: Gagal load halaman " + fxmlFile);
+            Label errorLabel = new Label("Error: failed to load " + fxmlFile);
             contentPane.setContent(errorLabel);
         }
     }
@@ -71,5 +73,15 @@ public class MainWindowController {
         }
         navItem.getStyleClass().add("nav-item-active");
         activeNav = navItem;
+    }
+
+    public static MainWindowController getInstance() {
+        return instance;
+    }
+
+    public void navigateToTaskListWithSearch(String query) {
+        com.pomodone.view.util.SearchContext.setPendingQuery(query);
+        navigateTo("TaskListView.fxml");
+        setActive(taskNav);
     }
 }

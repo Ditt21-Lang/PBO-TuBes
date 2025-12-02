@@ -6,6 +6,12 @@ import com.pomodone.model.task.TaskStatus;
 import com.pomodone.service.TaskService;
 import com.pomodone.util.CollectionViewProcessor;
 import com.pomodone.util.SortDirection;
+import com.pomodone.strategy.task.TaskSortStrategy;
+import com.pomodone.strategy.task.NameAscSortStrategy;
+import com.pomodone.strategy.task.NameDescSortStrategy;
+import com.pomodone.strategy.task.DueDateAscSortStrategy;
+import com.pomodone.strategy.task.DueDateDescSortStrategy;
+import com.pomodone.strategy.task.DifficultyDescSortStrategy;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -24,8 +30,10 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class TaskListController {
 
@@ -34,6 +42,7 @@ public class TaskListController {
     @FXML private Button viewSettingsButton;
     @FXML private Button closeFilterPanelButton;
     @FXML private VBox filterPanel;
+    @FXML private TextField taskSearchField;
     @FXML private CheckBox pendingCheckBox;
     @FXML private CheckBox overdueCheckBox;
     @FXML private CheckBox doneCheckBox;
@@ -55,6 +64,8 @@ public class TaskListController {
     private final DateTimeFormatter deadlineFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, HH:mm");
     private final DateTimeFormatter listDeadlineFormatter = DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy HH:mm", new Locale("id", "ID"));
     private List<Task> allTasks = new ArrayList<>();
+    private String currentSearch = "";
+    private final Map<SortChoice, TaskSortStrategy> sortStrategies = new EnumMap<>(SortChoice.class);
 
     @FXML
     public void initialize() {
@@ -65,11 +76,31 @@ public class TaskListController {
         setupAddButton();
         setupFilterControls();
         setupSortControls();
+        setupSortStrategies();
+        setupSearchField();
         loadTaskFromDatabase();
+        applyPendingSearch();
     }
 
     private void setupAddButton() {
         addTaskButton.setOnAction(event -> showAddTaskDialog());
+    }
+
+    private void setupSearchField() {
+        if (taskSearchField == null) return;
+        taskSearchField.textProperty().addListener((obs, oldV, newV) -> {
+            currentSearch = newV != null ? newV.trim() : "";
+            refreshTaskList();
+        });
+    }
+
+    private void applyPendingSearch() {
+        String pending = com.pomodone.view.util.SearchContext.consumePendingQuery();
+        if (pending != null && taskSearchField != null) {
+            taskSearchField.setText(pending);
+            currentSearch = pending.trim();
+            refreshTaskList();
+        }
     }
 
     private void setupListListener() {
@@ -202,27 +233,12 @@ public class TaskListController {
         sortToggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> refreshTaskList());
     }
 
-    private Comparator<Task> dueDateComparator() {
-        return Comparator.comparing(
-                Task::getDueDate,
-                Comparator.nullsLast(LocalDateTime::compareTo)
-        );
-    }
-
-    private Comparator<Task> titleComparator() {
-        return Comparator.comparing(Task::getTitle, String.CASE_INSENSITIVE_ORDER);
-    }
-
-    private Comparator<Task> difficultyComparator() {
-        return Comparator.comparingInt(task -> mapDifficulty(task.getDifficulty()));
-    }
-
-    private int mapDifficulty(TaskDifficulty difficulty) {
-        return switch (difficulty) {
-            case MUDAH -> 1;
-            case SEDANG -> 2;
-            case SULIT -> 3;
-        };
+    private void setupSortStrategies() {
+        sortStrategies.put(SortChoice.NAME_ASC, new NameAscSortStrategy());
+        sortStrategies.put(SortChoice.NAME_DESC, new NameDescSortStrategy());
+        sortStrategies.put(SortChoice.DUE_DATE_ASC, new DueDateAscSortStrategy());
+        sortStrategies.put(SortChoice.DUE_DATE_DESC, new DueDateDescSortStrategy());
+        sortStrategies.put(SortChoice.DIFFICULTY_DESC, new DifficultyDescSortStrategy());
     }
 
     private void handleFilterChange() {
@@ -253,21 +269,6 @@ public class TaskListController {
         if (sortDifficultyDescRadio.isSelected()) return SortChoice.DIFFICULTY_DESC;
         // default fallback
         return SortChoice.DUE_DATE_ASC;
-    }
-
-    private Comparator<Task> resolveComparator(SortChoice choice) {
-        return switch (choice) {
-            case NAME_ASC, NAME_DESC -> titleComparator();
-            case DUE_DATE_ASC, DUE_DATE_DESC -> dueDateComparator();
-            case DIFFICULTY_DESC -> difficultyComparator();
-        };
-    }
-
-    private SortDirection resolveDirection(SortChoice choice) {
-        return switch (choice) {
-            case NAME_ASC, DUE_DATE_ASC -> SortDirection.ASC;
-            case NAME_DESC, DUE_DATE_DESC, DIFFICULTY_DESC -> SortDirection.DESC;
-        };
     }
 
     // --- LOGIKA MENAMPILKAN DIALOG INPUT ---
@@ -339,7 +340,7 @@ public class TaskListController {
                     return null;
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Alert alert = new Alert(Alert.AlertType.ERROR, "Gagal simpan: " + e.getMessage());
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to save: " + e.getMessage());
                     alert.show();
                     return null;
                 }
@@ -388,15 +389,24 @@ public class TaskListController {
     }
 
     private boolean statusSelected(Task task) {
-        return (pendingCheckBox.isSelected() && task.getStatus() == TaskStatus.BELUM_SELESAI)
+        boolean statusOk = (pendingCheckBox.isSelected() && task.getStatus() == TaskStatus.BELUM_SELESAI)
                 || (overdueCheckBox.isSelected() && task.getStatus() == TaskStatus.TERLAMBAT)
                 || (doneCheckBox.isSelected() && task.getStatus() == TaskStatus.SELESAI);
+        return statusOk && matchesSearch(task);
+    }
+
+    private boolean matchesSearch(Task task) {
+        if (currentSearch == null || currentSearch.isEmpty()) return true;
+        String query = currentSearch.toLowerCase();
+        return (task.getTitle() != null && task.getTitle().toLowerCase().contains(query))
+                || (task.getDescription() != null && task.getDescription().toLowerCase().contains(query));
     }
 
     private void refreshTaskList() {
         SortChoice sortChoice = resolveSortChoice();
-        Comparator<Task> comparator = resolveComparator(sortChoice);
-        SortDirection direction = resolveDirection(sortChoice);
+        TaskSortStrategy strategy = sortStrategies.getOrDefault(sortChoice, sortStrategies.get(SortChoice.DUE_DATE_ASC));
+        Comparator<Task> comparator = strategy != null ? strategy.getComparator() : null;
+        SortDirection direction = strategy != null ? strategy.getDirection() : SortDirection.ASC;
 
         List<Task> processed = viewProcessor.apply(
                 allTasks,
@@ -407,7 +417,7 @@ public class TaskListController {
 
         taskListView.getItems().setAll(processed);
         if (processed.isEmpty()) {
-            taskListView.setPlaceholder(new Label("Tidak ada tugas untuk filter ini."));
+            taskListView.setPlaceholder(new Label("No tasks for this filter/search."));
             detailContainer.setVisible(false);
         } else {
             taskListView.getSelectionModel().selectFirst();

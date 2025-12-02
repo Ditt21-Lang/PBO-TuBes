@@ -69,21 +69,21 @@ public class SettingsController {
 
     private boolean validatePositiveInteger(String value, TextField field, Label errorLabel) {
         if (value == null || value.trim().isEmpty()) {
-            toggleError(field, errorLabel, true, "Gaboleh kosong slur.");
+            toggleError(field, errorLabel, true, "Cannot be empty.");
             return false;
         }
         if (value.contains(".") || value.contains(",")) {
-            toggleError(field, errorLabel, true, "Gaboleh ada desimal.");
+            toggleError(field, errorLabel, true, "Decimals are not allowed.");
             return false;
         }
         try {
             int intValue = Integer.parseInt(value);
             if (intValue < 0) {
-                toggleError(field, errorLabel, true, "Harus bilangan positif.");
+                toggleError(field, errorLabel, true, "Must be a positive number.");
                 return false;
             }
         } catch (NumberFormatException e) {
-            toggleError(field, errorLabel, true, "Harus bilangan bulet.");
+            toggleError(field, errorLabel, true, "Must be a whole number.");
             return false;
         }
         toggleError(field, errorLabel, false, "");
@@ -111,7 +111,7 @@ public class SettingsController {
             dailyTargetField.setText(String.valueOf(user.getDailyPomodoroTarget()));
             weeklyTargetField.setText(String.valueOf(user.getWeeklyPomodoroTarget()));
         } else {
-            showAlert(Alert.AlertType.ERROR, "Error", "Gabisa load settingan user.");
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to load user settings.");
             nameField.setDisable(true);
             dailyTargetField.setDisable(true);
             weeklyTargetField.setDisable(true);
@@ -123,7 +123,7 @@ public class SettingsController {
         if (success) {
             showAlert(Alert.AlertType.INFORMATION, "Success", "Nama berhasil diupdate.");
         } else {
-            showAlert(Alert.AlertType.ERROR, "Error", "Gagal update nama.");
+            showAlert(Alert.AlertType.ERROR, "Error", "Failed to update name.");
         }
     }
 
@@ -136,7 +136,7 @@ public class SettingsController {
             if (success) {
                 showAlert(Alert.AlertType.INFORMATION, "Success", "Target berhasil disimpan.");
             } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "Gagal nyimpen target.");
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to save targets.");
             }
         } catch (NumberFormatException e) {
             // harusnya gabisa nyampe sini kalo tombolnya udah di-disable

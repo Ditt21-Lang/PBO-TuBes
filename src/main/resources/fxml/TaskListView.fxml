@@ -8,6 +8,7 @@
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
@@ -18,9 +19,12 @@
       xmlns:fx="http://javafx.com/fxml/1" 
       fx:controller="com.pomodone.view.TaskListController">
 
-    <VBox spacing="4.0">
-        <Label styleClass="header-title" text="Tasks"/>
-        <Label styleClass="header-subtitle" text="Manage your daily goals."/>
+    <VBox spacing="8.0">
+        <VBox spacing="4.0">
+            <Label styleClass="header-title" text="Tasks"/>
+            <Label styleClass="header-subtitle" text="Manage your daily goals."/>
+        </VBox>
+        <TextField fx:id="taskSearchField" promptText="Search tasks..." styleClass="search-field" />
     </VBox>
 
     <HBox spacing="20.0" VBox.vgrow="ALWAYS">
@@ -47,25 +51,25 @@
                     <Insets top="12" right="12" />
                 </StackPane.margin>
                 <HBox alignment="CENTER_LEFT" spacing="6.0">
-                    <Label text="Pengaturan tampilan" styleClass="floating-title"/>
+                    <Label text="View settings" styleClass="floating-title"/>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Button fx:id="closeFilterPanelButton" text="X" styleClass="ghost-icon-button"/>
                 </HBox>
                 <VBox spacing="8.0">
-                    <Label text="Urutkan menurut" styleClass="floating-title"/>
-                    <RadioButton fx:id="sortNameAscRadio" text="Nama: A ke Z" />
-                    <RadioButton fx:id="sortNameDescRadio" text="Nama: Z ke A" />
-                    <RadioButton fx:id="sortDueSoonRadio" text="Tgl: Terdekat - Terjauh" />
-                    <RadioButton fx:id="sortDueLateRadio" text="Tgl: Terjauh - Terdekat" />
-                    <RadioButton fx:id="sortDifficultyDescRadio" text="Kesulitan: Tinggi - Rendah" />
+                    <Label text="Sort by" styleClass="floating-title"/>
+                    <RadioButton fx:id="sortNameAscRadio" text="Name: A to Z" />
+                    <RadioButton fx:id="sortNameDescRadio" text="Name: Z to A" />
+                    <RadioButton fx:id="sortDueSoonRadio" text="Due: Soonest" />
+                    <RadioButton fx:id="sortDueLateRadio" text="Due: Latest" />
+                    <RadioButton fx:id="sortDifficultyDescRadio" text="Difficulty: High to Low" />
                 </VBox>
                 <Separator/>
                 <VBox spacing="8.0">
-                    <Label text="Filter status" styleClass="floating-title"/>
-                    <CheckBox fx:id="pendingCheckBox" text="Belum selesai" styleClass="pill-checkbox"/>
-                    <CheckBox fx:id="overdueCheckBox" text="Terlambat" styleClass="pill-checkbox"/>
-                    <CheckBox fx:id="doneCheckBox" text="Selesai" styleClass="pill-checkbox"/>
-                    <Label text="Default: Belum selesai + Terlambat" styleClass="helper-text"/>
+                    <Label text="Status filter" styleClass="floating-title"/>
+                    <CheckBox fx:id="pendingCheckBox" text="Open" styleClass="pill-checkbox"/>
+                    <CheckBox fx:id="overdueCheckBox" text="Overdue" styleClass="pill-checkbox"/>
+                    <CheckBox fx:id="doneCheckBox" text="Done" styleClass="pill-checkbox"/>
+                    <Label text="Default: Open + Overdue" styleClass="helper-text"/>
                 </VBox>
             </VBox>
         </StackPane>
@@ -76,7 +80,7 @@
             </padding>
 
             <VBox spacing="8.0">
-                <Label fx:id="detailTitleLabel" styleClass="header-title" style="-fx-font-size: 24px;" wrapText="true" text="Judul Tugas"/>
+                <Label fx:id="detailTitleLabel" styleClass="header-title" style="-fx-font-size: 24px;" wrapText="true" text="Task Title"/>
                 
                 <HBox spacing="10.0" alignment="CENTER_LEFT">
                     <Label fx:id="detailStatusLabel" style="-fx-text-fill: -color-accent; -fx-font-weight: bold; -fx-font-size: 13px;" text="IN_PROGRESS"/>
