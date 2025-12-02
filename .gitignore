@@ -41,6 +41,7 @@ build/
 
 ### Environment ###
 .env
+.javafx-cache/
 
 
 ### TO DO ###
