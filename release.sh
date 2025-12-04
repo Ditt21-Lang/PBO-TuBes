@@ -19,13 +19,40 @@ detect_os() {
 
 OS_TYPE="$(detect_os)"
 
-if [ -z "${JPACKAGE_TYPE:-}" ]; then
+# --- KONFIGURASI TIPE PAKET ---
+# Jika user memberikan input spesifik via env var, pakai itu.
+# Jika tidak, tentukan default berdasarkan OS.
+# Untuk Linux, set default array berisi "deb" DAN "rpm".
+PACKAGE_TYPES=()
+
+if [ -n "${JPACKAGE_TYPE:-}" ]; then
+    PACKAGE_TYPES=("$JPACKAGE_TYPE")
+else
     case "$OS_TYPE" in
-        macos) JPACKAGE_TYPE="dmg" ;;
-        windows) JPACKAGE_TYPE="msi" ;;
-        linux) JPACKAGE_TYPE="deb" ;;
-        *) JPACKAGE_TYPE="app-image" ;;
+        macos) PACKAGE_TYPES=("dmg") ;;
+        windows) PACKAGE_TYPES=("msi") ;;
+        linux)
+            if [ -f /etc/os-release ]; then
+                . /etc/os-release
+                if [[ "$ID" == "fedora" || "$ID_LIKE" == *"fedora"* ]]; then
+                    PACKAGE_TYPES=("rpm")
+                else
+                    PACKAGE_TYPES=("deb" "rpm")
+                fi
+            else
+                PACKAGE_TYPES=("deb" "rpm")
+            fi
+            ;;
+        *) PACKAGE_TYPES=("app-image") ;;
     esac
+fi
+
+# Check for rpm-build if we are building rpm
+if [[ " ${PACKAGE_TYPES[*]} " =~ " rpm " ]]; then
+    if ! command -v rpmbuild >/dev/null 2>&1; then
+        echo "rpmbuild tidak ditemukan. Install dengan: sudo dnf install rpm-build" >&2
+        exit 1
+    fi
 fi
 
 if ! command -v mvn >/dev/null 2>&1; then
@@ -141,16 +168,54 @@ ADD_MODULES_VALUE="${JPACKAGE_MODULES:-javafx.controls,javafx.fxml,javafx.media}
 
 JAVA_OPTS=(--module-path "\$APPDIR/javafx-mods" --add-modules "$ADD_MODULES_VALUE" --add-opens java.base/java.lang=ALL-UNNAMED)
 
-echo "Membungkus native app via jpackage..."
-jpackage \
-  --name "$APP_NAME" \
-  --input "$INPUT_DIR" \
-  --main-jar "$MAIN_JAR" \
-  --main-class "$MAIN_CLASS" \
-  --dest "$DIST_DIR" \
-  --type "$JPACKAGE_TYPE" \
-  --app-version "$APP_VERSION" \
-  --java-options "${JAVA_OPTS[*]}" \
-  ${ICON_PATH:+--icon "$ICON_PATH"}
+# --- LOOPING UNTUK BUILD SEMUA TIPE ---
+for TYPE in "${PACKAGE_TYPES[@]}"; do
+    echo "=========================================="
+    echo "Membungkus native app via jpackage (Tipe: $TYPE)..."
+    echo "=========================================="
 
+    jpackage \
+      --name "$APP_NAME" \
+      --input "$INPUT_DIR" \
+      --main-jar "$MAIN_JAR" \
+      --main-class "$MAIN_CLASS" \
+      --dest "$DIST_DIR" \
+      --type "$TYPE" \
+      --app-version "$APP_VERSION" \
+      --java-options "${JAVA_OPTS[*]}" \
+      --linux-shortcut \
+      ${ICON_PATH:+--icon "$ICON_PATH"} || {
+          echo "GAGAL membuat paket tipe: $TYPE. Pastikan tools (rpm-build/dpkg-deb) terinstall."
+          continue
+      }
+done
+
+echo "=========================================="
 echo "Selesai. Lihat output di: $DIST_DIR"
+
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    if [[ "$ID" == "fedora" || "$ID_LIKE" == *"fedora"* ]]; then
+        echo "=========================================="
+        echo "Deteksi Fedora: Memulai instalasi otomatis..."
+        echo "=========================================="
+        
+        RPM_FILE=$(find "$DIST_DIR" -name "*.rpm" | head -n 1)
+        if [ -n "$RPM_FILE" ]; then
+            echo "Ditemukan: $RPM_FILE"
+            echo "Meminta izin sudo untuk menginstall..."
+            sudo dnf install -y "$RPM_FILE"
+            
+            if [ $? -eq 0 ]; then
+                echo "Instalasi BERHASIL!"
+                echo "Aplikasi telah ditambahkan ke menu desktop."
+                echo "Menjalankan aplikasi sekarang..."
+                /opt/pomodone/bin/Pomodone
+            else
+                echo "Instalasi gagal."
+            fi
+        else
+            echo "File RPM tidak ditemukan."
+        fi
+    fi
+fi
