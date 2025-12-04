@@ -470,14 +470,30 @@ public class TaskListController {
             taskListView.getSelectionModel().selectFirst();
         }
     }
+
     private void handleDeleteTask() {
         if (selectedTask == null) return;
 
-        taskFacade.destroyTask((int)selectedTask.getId());
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Delete Task");
+        confirm.setHeaderText("Are you sure you want to delete this task?");
+        confirm.setContentText("Task: " + selectedTask.getTitle());
 
-        loadTaskFromDatabase();
-        detailContainer.setVisible(false);
+        ButtonType deleteButton = new ButtonType("Delete", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        confirm.getButtonTypes().setAll(deleteButton, cancelButton);
+
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == deleteButton) {
+                // Kalau user menekan Delete -> baru eksekusi
+                taskFacade.destroyTask((int) selectedTask.getId());
+                loadTaskFromDatabase();
+                detailContainer.setVisible(false);
+            }
+        });
     }
+
 
     private void handleMarkDone() {
         if (selectedTask == null) return;
