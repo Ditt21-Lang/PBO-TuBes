@@ -13,7 +13,12 @@ public class TaskService {
     private final TaskRepository taskRepository;
 
     public TaskService() {
-        this.taskRepository = new TaskRepository();
+        this(new TaskRepository());
+    }
+
+    // ctor ini buat kebutuhan pengujian (injeksi mock)
+    TaskService(TaskRepository taskRepository) {
+        this.taskRepository = taskRepository;
     }
 
     public void createNewTask(String title, String description, LocalDateTime duedate, TaskDifficulty difficulty) {

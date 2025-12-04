@@ -1,29 +1,15 @@
 package com.pomodone.util;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 class CollectionViewProcessorTest {
-
-    @Mock
-    private Predicate<TestItem> predicate;
-
-    @Mock
-    private Comparator<TestItem> comparator;
 
     private final CollectionViewProcessor<TestItem> processor = new CollectionViewProcessor<>();
 
@@ -34,21 +20,18 @@ class CollectionViewProcessorTest {
         TestItem c = new TestItem("C", 3);
         List<TestItem> source = List.of(a, b, c);
 
-        // Only keep A and C
-        when(predicate.test(a)).thenReturn(true);
-        when(predicate.test(b)).thenReturn(false);
-        when(predicate.test(c)).thenReturn(true);
+        AtomicInteger filterHits = new AtomicInteger();
+        Predicate<TestItem> predicate = item -> {
+            filterHits.incrementAndGet();
+            return item != b; // buang B
+        };
 
-        // Sort by rank ascending
-        Comparator<TestItem> delegate = Comparator.comparingInt(TestItem::rank);
-        when(comparator.compare(any(), any()))
-                .thenAnswer(inv -> delegate.compare(inv.getArgument(0), inv.getArgument(1)));
+        Comparator<TestItem> comparator = Comparator.comparingInt(TestItem::rank);
 
         List<TestItem> result = processor.apply(source, predicate, comparator, SortDirection.ASC);
 
         assertEquals(List.of(a, c), result);
-        verify(predicate, times(3)).test(any());
-        verify(comparator, atLeast(1)).compare(any(), any());
+        assertEquals(3, filterHits.get());
     }
 
     @Test
@@ -58,17 +41,18 @@ class CollectionViewProcessorTest {
         TestItem c = new TestItem("C", 3);
         List<TestItem> source = List.of(a, b, c);
 
-        when(predicate.test(any())).thenReturn(true);
+        AtomicInteger filterHits = new AtomicInteger();
+        Predicate<TestItem> predicate = item -> {
+            filterHits.incrementAndGet();
+            return true;
+        };
 
-        Comparator<TestItem> delegate = Comparator.comparingInt(TestItem::rank);
-        when(comparator.compare(any(), any()))
-                .thenAnswer(inv -> delegate.compare(inv.getArgument(0), inv.getArgument(1)));
+        Comparator<TestItem> comparator = Comparator.comparingInt(TestItem::rank);
 
         List<TestItem> result = processor.apply(source, predicate, comparator, SortDirection.DESC);
 
         assertEquals(List.of(c, a, b), result);
-        verify(predicate, times(3)).test(any());
-        verify(comparator, atLeast(1)).compare(any(), any());
+        assertEquals(3, filterHits.get());
     }
 
     @Test
@@ -78,14 +62,11 @@ class CollectionViewProcessorTest {
         TestItem b = new TestItem("B", 1);
         List<TestItem> source = List.of(a, b);
 
-        Comparator<TestItem> delegate = Comparator.comparingInt(TestItem::rank);
-        when(comparator.compare(any(), any()))
-                .thenAnswer(inv -> delegate.compare(inv.getArgument(0), inv.getArgument(1)));
+        Comparator<TestItem> comparator = Comparator.comparingInt(TestItem::rank);
 
         List<TestItem> result = processor.apply(source, null, comparator, SortDirection.ASC);
 
         assertEquals(List.of(b, a), result);
-        verify(comparator, atLeast(1)).compare(any(), any());
     }
 
     @Test
@@ -96,14 +77,16 @@ class CollectionViewProcessorTest {
         TestItem c = new TestItem("C", 3);
         List<TestItem> source = List.of(a, b, c);
 
-        when(predicate.test(a)).thenReturn(true);
-        when(predicate.test(b)).thenReturn(false);
-        when(predicate.test(c)).thenReturn(true);
+        AtomicInteger filterHits = new AtomicInteger();
+        Predicate<TestItem> predicate = item -> {
+            filterHits.incrementAndGet();
+            return item != b;
+        };
 
         List<TestItem> result = processor.apply(source, predicate, null, SortDirection.DESC);
 
         assertEquals(List.of(a, c), result);
-        verify(predicate, times(3)).test(any());
+        assertEquals(3, filterHits.get());
     }
 
     private record TestItem(String name, int rank) {}

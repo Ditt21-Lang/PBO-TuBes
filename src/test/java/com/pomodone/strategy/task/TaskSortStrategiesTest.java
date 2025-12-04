@@ -26,9 +26,9 @@ class TaskSortStrategiesTest {
         assertEquals(List.of(a, b), list);
         assertEquals(SortDirection.ASC, new NameAscSortStrategy().getDirection());
 
-        // comparator sama, tapi arah beda di processor
+        // comparator sama, arah dibalik oleh view processor, jadi di sini order tetap sama
         list.sort(new NameDescSortStrategy().getComparator());
-        assertEquals(List.of(b, a), list); // comparator sama, arah beda di view processor
+        assertEquals(List.of(a, b), list);
         assertEquals(SortDirection.DESC, new NameDescSortStrategy().getDirection());
     }
 
