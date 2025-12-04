@@ -5,7 +5,7 @@ import com.pomodone.repository.PomodoroPresetRepository;
 
 public class CustomPomodoroPresetService {
     private final PomodoroPresetRepository repository;
-    private final long currentUserId = 1; // TODO: ganti kalau sudah ada login
+    private final long currentUserId = 1;
 
     public CustomPomodoroPresetService() {
         this.repository = new PomodoroPresetRepository();

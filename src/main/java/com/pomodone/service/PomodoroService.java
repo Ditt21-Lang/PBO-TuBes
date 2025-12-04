@@ -11,6 +11,7 @@ import javafx.beans.property.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
+import javafx.animation.Animation;
 
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -47,7 +48,7 @@ public class PomodoroService {
 
     private PomodoroService() {
         timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> tick()));
-        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.setCycleCount(Animation.INDEFINITE);
         
         loadAlarmSound();
         selectMode(PomodoroMode.CLASSIC); // default-nya classic
@@ -167,7 +168,7 @@ public class PomodoroService {
         if (currentSessionTotalDuration == null || currentSessionTotalDuration.isZero()) {
             progress.set(0.0);
         } else {
-            double elapsed = currentSessionTotalDuration.toSeconds() - timeRemaining.toSeconds();
+            double elapsed = (double)currentSessionTotalDuration.toSeconds() - timeRemaining.toSeconds();
             double total = currentSessionTotalDuration.toSeconds();
             progress.set(total > 0 ? elapsed / total : 0);
         }

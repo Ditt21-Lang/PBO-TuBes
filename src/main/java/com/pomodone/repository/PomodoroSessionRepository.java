@@ -14,8 +14,9 @@ public class PomodoroSessionRepository {
 
     public void insertCompletedSession(long userId, LocalDateTime startedAt, LocalDateTime endedAt, long durationSeconds, PomodoroService.PomodoroMode mode) {
         String sql = """
-            INSERT INTO pomodoro_sessions (user_id, started_at, ended_at, duration_seconds, mode, status, created_at)
-            VALUES (?, ?, ?, ?, ?::pomodoro_mode, 'COMPLETED', NOW())
+            INSERT INTO pomodoro_sessions (user_id, started_at, ended_at, duration_seconds, mode, status)
+            -- CURRENT_TIMESTAMP di default kolom, jadi query tetap portable
+            VALUES (?, ?, ?, ?, ?, 'COMPLETED')
         """;
 
         try (Connection conn = DatabaseConfig.getInstance().getConnection();

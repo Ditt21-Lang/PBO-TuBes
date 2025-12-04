@@ -38,11 +38,13 @@ build/
 ### Mac OS ###
 .DS_Store
 
-
 ### Environment ###
 .env
 .javafx-cache/
 
-
 ### TO DO ###
 tasks.md
+text.txt
+
+### Databases ###
+*.db

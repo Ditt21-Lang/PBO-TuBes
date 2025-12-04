@@ -51,7 +51,7 @@ public class TaskRepository {
     
     public void save(Task task) {
         String sql = "INSERT INTO tasks (judul_tugas, deskripsi_tugas, tenggat_tugas, tingkat_kesulitan, status, created_at, updated_at)" +
-                     "VALUES(?, ?, ?, ?::task_difficulty, ?::task_status, ?, ?)";
+                     "VALUES(?, ?, ?, ?, ?, ?, ?)";
     
         try (Connection conn = DatabaseConfig.getInstance().getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, task.getTitle());
@@ -105,7 +105,11 @@ public class TaskRepository {
 
 
     public List<Task> findAll() {
-        String sql = "SELECT * FROM tasks ORDER BY created_At DESC";
+        String sql = """
+            SELECT * FROM tasks
+            -- Deadline yang ada diurutkan dulu, yang null disusul belakangan
+            ORDER BY CASE WHEN tenggat_tugas IS NULL THEN 1 ELSE 0 END, tenggat_tugas ASC, created_at DESC
+        """;
         List<Task> taskList = new ArrayList<>();
 
         try (Connection conn = DatabaseConfig.getInstance().getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
@@ -162,8 +166,8 @@ public class TaskRepository {
                 judul_tugas = ?, 
                 deskripsi_tugas = ?, 
                 tenggat_tugas = ?, 
-                tingkat_kesulitan = ?::task_difficulty, 
-                status = ?::task_status, 
+                tingkat_kesulitan = ?, 
+                status = ?, 
                 updated_at = ?
             WHERE id = ?
         """;
@@ -236,7 +240,7 @@ public class TaskRepository {
         String sql = """
             SELECT * FROM tasks
             WHERE status <> 'SELESAI'
-            ORDER BY tenggat_tugas ASC NULLS LAST, created_at DESC
+            ORDER BY CASE WHEN tenggat_tugas IS NULL THEN 1 ELSE 0 END, tenggat_tugas ASC, created_at DESC
             LIMIT ?
         """;
         List<Task> result = new ArrayList<>();

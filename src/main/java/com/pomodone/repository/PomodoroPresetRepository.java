@@ -38,12 +38,13 @@ public class PomodoroPresetRepository {
         String sql = """
             INSERT INTO pomodoro_custom_presets (user_id, preset_name, focus_minutes, short_break_minutes, long_break_minutes, rounds)
             VALUES (?, ?, ?, ?, ?, ?)
+            -- Upsert portable: ON CONFLICT ada di Postgres/SQLite modern
             ON CONFLICT (user_id, preset_name) DO UPDATE SET
                 focus_minutes = EXCLUDED.focus_minutes,
                 short_break_minutes = EXCLUDED.short_break_minutes,
                 long_break_minutes = EXCLUDED.long_break_minutes,
                 rounds = EXCLUDED.rounds,
-                updated_at = NOW()
+                updated_at = CURRENT_TIMESTAMP
         """;
 
         try (Connection conn = DatabaseConfig.getInstance().getConnection();
