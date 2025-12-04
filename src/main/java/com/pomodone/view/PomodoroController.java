@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 
 public class PomodoroController {
     private static final Logger log = LoggerFactory.getLogger(PomodoroController.class);
+    private static final String FIELD_ERROR_STYLE = "field-error";
+    private static final String MINUTES_SUFFIX = " minutes";
 
     @FXML private Label statusLabel;
     @FXML private Label hoursLabel;
@@ -146,37 +148,23 @@ public class PomodoroController {
         boolean isCustomMode = customModeButton.isSelected();
         boolean areCustomFieldsInvalid = !isFocusValid.get() || !isShortBreakValid.get() || !isLongBreakValid.get() || !isRoundsValid.get();
         
-        if (isCustomMode && areCustomFieldsInvalid) {
-            startButton.setDisable(true);
-        } else {
-            startButton.setDisable(false);
-        }
+        startButton.setDisable(isCustomMode && areCustomFieldsInvalid);
     }
 
     private void setupValidationListeners() {
-        customFocusField.textProperty().addListener((obs, oldV, newV) -> {
-            if (isFocusValid.get() != validatePositiveInteger(newV, customFocusField, focusErrorLabel, false)) {
-                isFocusValid.set(!isFocusValid.get());
+        setupFieldValidation(customFocusField, isFocusValid, focusErrorLabel, false);
+        setupFieldValidation(customShortBreakField, isShortBreakValid, shortBreakErrorLabel, true);
+        setupFieldValidation(customLongBreakField, isLongBreakValid, longBreakErrorLabel, true);
+        setupFieldValidation(customRoundsField, isRoundsValid, roundsErrorLabel, false);
+    }
+
+    private void setupFieldValidation(TextField field, BooleanProperty validProperty, Label errorLabel, boolean allowZero) {
+        field.textProperty().addListener((obs, oldV, newV) -> {
+            boolean isValid = validatePositiveInteger(newV, field, errorLabel, allowZero);
+            if (validProperty.get() != isValid) {
+                validProperty.set(isValid);
             }
-            if (isFocusValid.get()) applyCustomSettings();
-        });
-        customShortBreakField.textProperty().addListener((obs, oldV, newV) -> {
-            if (isShortBreakValid.get() != validatePositiveInteger(newV, customShortBreakField, shortBreakErrorLabel, true)) {
-                isShortBreakValid.set(!isShortBreakValid.get());
-            }
-            if(isShortBreakValid.get()) applyCustomSettings();
-        });
-        customLongBreakField.textProperty().addListener((obs, oldV, newV) -> {
-            if (isLongBreakValid.get() != validatePositiveInteger(newV, customLongBreakField, longBreakErrorLabel, true)) {
-                isLongBreakValid.set(!isLongBreakValid.get());
-            }
-            if(isLongBreakValid.get()) applyCustomSettings();
-        });
-        customRoundsField.textProperty().addListener((obs, oldV, newV) -> {
-            if (isRoundsValid.get() != validatePositiveInteger(newV, customRoundsField, roundsErrorLabel, false)) {
-                isRoundsValid.set(!isRoundsValid.get());
-            }
-            if(isRoundsValid.get()) applyCustomSettings();
+            if (validProperty.get()) applyCustomSettings();
         });
     }
     
@@ -208,9 +196,9 @@ public class PomodoroController {
         errorLabel.setVisible(showError);
         errorLabel.setManaged(showError);
         if (showError) {
-            if (!field.getStyleClass().contains("field-error")) field.getStyleClass().add("field-error");
+            if (!field.getStyleClass().contains(FIELD_ERROR_STYLE)) field.getStyleClass().add(FIELD_ERROR_STYLE);
         } else {
-            field.getStyleClass().remove("field-error");
+            field.getStyleClass().remove(FIELD_ERROR_STYLE);
         }
     }
     
@@ -251,9 +239,9 @@ public class PomodoroController {
     }
     
     private void populateDisplayLabels(PomodoroSettings settings) {
-        displayFocusLabel.setText(settings.getFocusDuration().toMinutes() + " minutes");
-        displayShortBreakLabel.setText(settings.getShortBreakDuration().toMinutes() + " minutes");
-        displayLongBreakLabel.setText(settings.getLongBreakDuration().toMinutes() + " minutes");
+        displayFocusLabel.setText(settings.getFocusDuration().toMinutes() + MINUTES_SUFFIX);
+        displayShortBreakLabel.setText(settings.getShortBreakDuration().toMinutes() + MINUTES_SUFFIX);
+        displayLongBreakLabel.setText(settings.getLongBreakDuration().toMinutes() + MINUTES_SUFFIX);
         displayRoundsLabel.setText(String.valueOf(settings.getRoundsBeforeLongBreak()));
     }
 

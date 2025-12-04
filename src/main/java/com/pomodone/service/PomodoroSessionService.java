@@ -9,7 +9,7 @@ import java.util.Locale;
 
 public class PomodoroSessionService {
     private final PomodoroSessionRepository repository;
-    private final long currentUserId = 1; // TODO: ganti kalau sudah ada login
+    private static final long CURRENT_USER_ID = 1;
 
     public PomodoroSessionService() {
         this.repository = new PomodoroSessionRepository();
@@ -17,18 +17,18 @@ public class PomodoroSessionService {
 
     public void logCompletedSession(LocalDateTime startedAt, LocalDateTime endedAt, long durationSeconds, PomodoroService.PomodoroMode mode) {
         if (startedAt == null || endedAt == null) return;
-        repository.insertCompletedSession(currentUserId, startedAt, endedAt, durationSeconds, mode);
+        repository.insertCompletedSession(CURRENT_USER_ID, startedAt, endedAt, durationSeconds, mode);
     }
 
     public int getTodayCompletedSessions() {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-        return repository.countSessionsSince(currentUserId, startOfDay);
+        return repository.countSessionsSince(CURRENT_USER_ID, startOfDay);
     }
 
     public int getCurrentWeekCompletedSessions() {
         LocalDate today = LocalDate.now();
         WeekFields wf = WeekFields.of(Locale.getDefault());
         LocalDate startOfWeek = today.with(wf.dayOfWeek(), 1);
-        return repository.countSessionsSince(currentUserId, startOfWeek.atStartOfDay());
+        return repository.countSessionsSince(CURRENT_USER_ID, startOfWeek.atStartOfDay());
     }
 }

@@ -16,8 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DatabaseConfig {
-    private static volatile DatabaseConfig instance;
     private static final Logger log = LoggerFactory.getLogger(DatabaseConfig.class);
+    private static final String USER_HOME = "user.home";
     private final DataSource dataSource;
 
     private DatabaseConfig() {
@@ -38,7 +38,7 @@ public class DatabaseConfig {
                 ((HikariDataSource) primary).close();
             }
             if (isSqlite(url)) {
-                throw new RuntimeException("Gagal inisialisasi SQLite: " + e.getMessage(), e);
+                throw new com.pomodone.exception.DatabaseException("Gagal inisialisasi SQLite: " + e.getMessage(), e);
             }
             // Koneksi utama gagal (URL salah/psql down), pakai SQLite sebagai fallback lokal
             log.warn("Koneksi DB utama gagal, fallback ke SQLite: {}", e.getMessage());
@@ -50,15 +50,12 @@ public class DatabaseConfig {
         this.dataSource = resolved;
     }
 
+    private static class Holder {
+        private static final DatabaseConfig INSTANCE = new DatabaseConfig();
+    }
+
     public static DatabaseConfig getInstance() {
-        if (instance == null) {
-            synchronized (DatabaseConfig.class) {
-                if (instance == null) {
-                    instance = new DatabaseConfig();
-                }
-            }
-        }
-        return instance;
+        return Holder.INSTANCE;
     }
 
     public Connection getConnection() throws SQLException {
@@ -82,7 +79,7 @@ public class DatabaseConfig {
                     .load()
                     .migrate();
         } catch (Exception e) {
-            throw new RuntimeException("Gagal menjalankan migrasi database: " + e.getMessage(), e);
+            throw new com.pomodone.exception.DatabaseException("Gagal menjalankan migrasi database: " + e.getMessage(), e);
         }
     }
 
@@ -95,11 +92,11 @@ public class DatabaseConfig {
         Path base;
         if (os.contains("win")) {
             String appData = System.getenv("APPDATA");
-            base = appData != null ? Paths.get(appData) : Paths.get(System.getProperty("user.home", "."));
+            base = appData != null ? Paths.get(appData) : Paths.get(System.getProperty(USER_HOME, "."));
         } else if (os.contains("mac")) {
-            base = Paths.get(System.getProperty("user.home", "."), "Library", "Application Support");
+            base = Paths.get(System.getProperty(USER_HOME, "."), "Library", "Application Support");
         } else {
-            base = Paths.get(System.getProperty("user.home", "."), ".local", "share");
+            base = Paths.get(System.getProperty(USER_HOME, "."), ".local", "share");
         }
 
         Path dataDir = base.resolve("pomodone");

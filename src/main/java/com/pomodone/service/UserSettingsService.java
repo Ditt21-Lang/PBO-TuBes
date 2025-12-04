@@ -7,27 +7,27 @@ import java.util.Optional;
 
 public class UserSettingsService {
     private final UserRepository userRepository;
-    private final long currentUserId = 1; // ID user sementara, ntar diganti
+    private static final long CURRENT_USER_ID = 1; // ID user sementara, ntar diganti
 
     public UserSettingsService() {
         this.userRepository = new UserRepository();
     }
 
     public Optional<User> getCurrentUserSettings() {
-        return userRepository.findById(currentUserId);
+        return userRepository.findById(CURRENT_USER_ID);
     }
 
     public boolean updateUserName(String newName) {
         if (newName == null || newName.trim().isEmpty()) {
             return false;
         }
-        return userRepository.updateName(currentUserId, newName.trim());
+        return userRepository.updateName(CURRENT_USER_ID, newName.trim());
     }
 
     public boolean updateUserTargets(int dailyTarget, int weeklyTarget) {
         if (dailyTarget < 0 || weeklyTarget < 0) {
             return false;
         }
-        return userRepository.updateTargets(currentUserId, dailyTarget, weeklyTarget);
+        return userRepository.updateTargets(CURRENT_USER_ID, dailyTarget, weeklyTarget);
     }
 }

@@ -29,7 +29,7 @@ public class DashboardController {
 
     private final DashboardStatsService statsService = new DashboardStatsService();
     private final TaskService taskService = new TaskService();
-    private final DateTimeFormatter dueFormatter = DateTimeFormatter.ofPattern("dd MMM HH:mm", new Locale("id", "ID"));
+    private final DateTimeFormatter dueFormatter = DateTimeFormatter.ofPattern("dd MMM HH:mm", Locale.forLanguageTag("id-ID"));
 
     @FXML
     public void initialize() {

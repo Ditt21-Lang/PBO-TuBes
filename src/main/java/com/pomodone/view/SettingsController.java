@@ -16,6 +16,9 @@ import java.util.Optional;
 
 public class SettingsController {
 
+    private static final String FIELD_ERROR_STYLE = "field-error";
+    private static final String ERROR_TITLE = "Error";
+
     // FXML Elements
     @FXML private TextField nameField;
     @FXML private Button updateNameButton;
@@ -58,13 +61,13 @@ public class SettingsController {
             toggleError(nameField, nameErrorLabel, !isValid, "Name cannot be empty.");
         });
 
-        dailyTargetField.textProperty().addListener((obs, oldVal, newVal) -> {
-            isDailyTargetValid.set(validatePositiveInteger(newVal, dailyTargetField, dailyTargetErrorLabel));
-        });
+        dailyTargetField.textProperty().addListener((obs, oldVal, newVal) -> 
+            isDailyTargetValid.set(validatePositiveInteger(newVal, dailyTargetField, dailyTargetErrorLabel))
+        );
 
-        weeklyTargetField.textProperty().addListener((obs, oldVal, newVal) -> {
-            isWeeklyTargetValid.set(validatePositiveInteger(newVal, weeklyTargetField, weeklyTargetErrorLabel));
-        });
+        weeklyTargetField.textProperty().addListener((obs, oldVal, newVal) -> 
+            isWeeklyTargetValid.set(validatePositiveInteger(newVal, weeklyTargetField, weeklyTargetErrorLabel))
+        );
     }
 
     private boolean validatePositiveInteger(String value, TextField field, Label errorLabel) {
@@ -95,11 +98,11 @@ public class SettingsController {
         errorLabel.setVisible(showError);
         errorLabel.setManaged(showError);
         if (showError) {
-            if (!field.getStyleClass().contains("field-error")) {
-                field.getStyleClass().add("field-error");
+            if (!field.getStyleClass().contains(FIELD_ERROR_STYLE)) {
+                field.getStyleClass().add(FIELD_ERROR_STYLE);
             }
         } else {
-            field.getStyleClass().remove("field-error");
+            field.getStyleClass().remove(FIELD_ERROR_STYLE);
         }
     }
 
@@ -111,7 +114,7 @@ public class SettingsController {
             dailyTargetField.setText(String.valueOf(user.getDailyPomodoroTarget()));
             weeklyTargetField.setText(String.valueOf(user.getWeeklyPomodoroTarget()));
         } else {
-            showAlert(Alert.AlertType.ERROR, "Error", "Failed to load user settings.");
+            showAlert(Alert.AlertType.ERROR, ERROR_TITLE, "Failed to load user settings.");
             nameField.setDisable(true);
             dailyTargetField.setDisable(true);
             weeklyTargetField.setDisable(true);
@@ -123,7 +126,7 @@ public class SettingsController {
         if (success) {
             showAlert(Alert.AlertType.INFORMATION, "Success", "Nama berhasil diupdate.");
         } else {
-            showAlert(Alert.AlertType.ERROR, "Error", "Failed to update name.");
+            showAlert(Alert.AlertType.ERROR, ERROR_TITLE, "Failed to update name.");
         }
     }
 
@@ -136,11 +139,11 @@ public class SettingsController {
             if (success) {
                 showAlert(Alert.AlertType.INFORMATION, "Success", "Target berhasil disimpan.");
             } else {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to save targets.");
+                showAlert(Alert.AlertType.ERROR, ERROR_TITLE, "Failed to save targets.");
             }
         } catch (NumberFormatException e) {
             // harusnya gabisa nyampe sini kalo tombolnya udah di-disable
-            showAlert(Alert.AlertType.ERROR, "Error", "Invalid number format.");
+            showAlert(Alert.AlertType.ERROR, ERROR_TITLE, "Invalid number format.");
         }
     }
 

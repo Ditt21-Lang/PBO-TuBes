@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import java.net.URL;
 import java.time.LocalDateTime;
 
+@SuppressWarnings("java:S6548")
+
 public class PomodoroService {
     private static PomodoroService instance;
     private static final Logger log = LoggerFactory.getLogger(PomodoroService.class);
@@ -59,7 +61,7 @@ public class PomodoroService {
     
     private void loadAlarmSound() {
         try {
-            URL resource = getClass().getResource("/audio/audio.mp3");
+            URL resource = getClass().getResource("/audio/audio.mp3"); 
             if (resource != null) {
                 alarmSound = new Media(resource.toExternalForm());
             } else {

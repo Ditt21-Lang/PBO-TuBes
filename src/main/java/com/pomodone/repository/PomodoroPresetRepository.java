@@ -61,8 +61,7 @@ public class PomodoroPresetRepository {
             pstmt.setInt(6, preset.getRounds());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            log.error("Gagal upsert preset custom user {}", userId, e);
-            throw new RuntimeException("Gagal menyimpan custom pomodoro preset: " + e.getMessage(), e);
+            throw new com.pomodone.exception.DatabaseException("Gagal menyimpan custom pomodoro preset: " + e.getMessage(), e);
         }
     }
 

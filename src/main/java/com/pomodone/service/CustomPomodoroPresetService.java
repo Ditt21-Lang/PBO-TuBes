@@ -5,26 +5,26 @@ import com.pomodone.repository.PomodoroPresetRepository;
 
 public class CustomPomodoroPresetService {
     private final PomodoroPresetRepository repository;
-    private final long currentUserId = 1;
+    private static final long CURRENT_USER_ID = 1;
 
     public CustomPomodoroPresetService() {
         this.repository = new PomodoroPresetRepository();
     }
 
     public CustomPomodoroPreset loadLatestPreset() {
-        return repository.findLatestByUser(currentUserId);
+        return repository.findLatestByUser(CURRENT_USER_ID);
     }
 
     public void savePreset(int focus, int shortBreak, int longBreak, int rounds) {
         CustomPomodoroPreset preset = new CustomPomodoroPreset(
                 0,
-                currentUserId,
+                CURRENT_USER_ID,
                 "Custom",
                 focus,
                 shortBreak,
                 longBreak,
                 rounds
         );
-        repository.upsert(currentUserId, preset);
+        repository.upsert(CURRENT_USER_ID, preset);
     }
 }

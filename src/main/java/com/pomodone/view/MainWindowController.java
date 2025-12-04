@@ -6,13 +6,14 @@ import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Objects;
 
+@SuppressWarnings({"java:S2696", "java:S6548"}) // Suppress warning for writing to static field from instance method and Singleton pattern
 public class MainWindowController {
     private static final Logger log = LoggerFactory.getLogger(MainWindowController.class);
 

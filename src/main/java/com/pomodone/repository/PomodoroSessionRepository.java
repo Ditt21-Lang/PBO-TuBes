@@ -32,8 +32,7 @@ public class PomodoroSessionRepository {
             pstmt.setString(5, mode.name());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            log.error("Gagal menyimpan sesi pomodoro", e);
-            throw new RuntimeException("Gagal menyimpan sesi pomodoro: " + e.getMessage(), e);
+            throw new com.pomodone.exception.DatabaseException("Gagal menyimpan sesi pomodoro: " + e.getMessage(), e);
         }
     }
 

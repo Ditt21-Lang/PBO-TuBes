@@ -55,7 +55,10 @@ public class TaskListController {
     @FXML private RadioButton sortDueSoonRadio;
     @FXML private RadioButton sortDueLateRadio;
     @FXML private RadioButton sortDifficultyDescRadio;
-    private ToggleGroup sortToggleGroup;
+    
+    private static final String STYLE_PRIORITY_HIGH = "task-item-priority-high";
+    private static final String STYLE_PRIORITY_MEDIUM = "task-item-priority-medium";
+    private static final String STYLE_PRIORITY_LOW = "task-item-priority-low";
     
     @FXML private VBox detailContainer;
     @FXML private Label detailTitleLabel;
@@ -69,7 +72,7 @@ public class TaskListController {
     private TaskService taskService;
     private final CollectionViewProcessor<Task> viewProcessor = new CollectionViewProcessor<>();
     private final DateTimeFormatter deadlineFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, HH:mm");
-    private final DateTimeFormatter listDeadlineFormatter = DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy HH:mm", new Locale("id", "ID"));
+    private final DateTimeFormatter listDeadlineFormatter = DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy HH:mm", Locale.forLanguageTag("id-ID"));
     private List<Task> allTasks = new ArrayList<>();
     private String currentSearch = "";
     private final Map<SortChoice, TaskSortStrategy> sortStrategies = new EnumMap<>(SortChoice.class);
@@ -140,7 +143,7 @@ public class TaskListController {
 
         DashboardTaskCell() {
             titleLabel.getStyleClass().add("task-item-title");
-            difficultyLabel.getStyleClass().add("task-item-priority-low");
+            difficultyLabel.getStyleClass().add(STYLE_PRIORITY_LOW);
             dueDateLabel.getStyleClass().add("task-item-due-date");
 
             VBox infoBox = new VBox(titleLabel, difficultyLabel);
@@ -177,11 +180,38 @@ public class TaskListController {
 
         private void updateDifficultyStyle(TaskDifficulty difficulty) {
             difficultyLabel.getStyleClass().removeAll(
-                    "task-item-priority-high",
-                    "task-item-priority-medium",
-                    "task-item-priority-low"
+                    STYLE_PRIORITY_HIGH,
+                    STYLE_PRIORITY_MEDIUM,
+                    STYLE_PRIORITY_LOW
             );
             difficultyLabel.getStyleClass().add(resolveDifficultyStyle(difficulty));
+        }
+
+        private String formatDifficultyLabel(TaskDifficulty difficulty) {
+            return switch (difficulty) {
+                case SULIT -> "Sulit";
+                case SEDANG -> "Sedang";
+                case MUDAH -> "Mudah";
+            };
+        }
+
+        private String resolveDifficultyStyle(TaskDifficulty difficulty) {
+            return switch (difficulty) {
+                case SULIT -> STYLE_PRIORITY_HIGH;
+                case SEDANG -> STYLE_PRIORITY_MEDIUM;
+                case MUDAH -> STYLE_PRIORITY_LOW;
+            };
+        }
+
+        private String formatDueDate(LocalDateTime dueDate) {
+            if (dueDate == null) return "";
+            return "Due: " + dueDate.format(listDeadlineFormatter);
+        }
+
+        private String truncateTitle(String title, int maxChars) {
+            if (title == null) return "";
+            if (title.length() <= maxChars) return title;
+            return title.substring(0, maxChars - 3) + "...";
         }
 
         private void updateDueDateStyle(Task task) {
@@ -193,32 +223,7 @@ public class TaskListController {
         }
     }
 
-    private String formatDifficultyLabel(TaskDifficulty difficulty) {
-        return switch (difficulty) {
-            case SULIT -> "Sulit";
-            case SEDANG -> "Sedang";
-            case MUDAH -> "Mudah";
-        };
-    }
 
-    private String resolveDifficultyStyle(TaskDifficulty difficulty) {
-        return switch (difficulty) {
-            case SULIT -> "task-item-priority-high";
-            case SEDANG -> "task-item-priority-medium";
-            case MUDAH -> "task-item-priority-low";
-        };
-    }
-
-    private String formatDueDate(LocalDateTime dueDate) {
-        if (dueDate == null) return "";
-        return "Due: " + dueDate.format(listDeadlineFormatter);
-    }
-
-    private String truncateTitle(String title, int maxChars) {
-        if (title == null) return "";
-        if (title.length() <= maxChars) return title;
-        return title.substring(0, maxChars - 3) + "...";
-    }
 
     private void setupFilterControls() {
         pendingCheckBox.setSelected(true);
@@ -235,7 +240,7 @@ public class TaskListController {
     }
 
     private void setupSortControls() {
-        sortToggleGroup = new ToggleGroup();
+        ToggleGroup sortToggleGroup = new ToggleGroup();
         sortNameAscRadio.setToggleGroup(sortToggleGroup);
         sortNameDescRadio.setToggleGroup(sortToggleGroup);
         sortDueSoonRadio.setToggleGroup(sortToggleGroup);
@@ -440,11 +445,11 @@ public class TaskListController {
     private void handleDeleteTask() {
         if (selectedTask == null) return;
 
-            taskFacade.destroyTask((int)selectedTask.getId());
+        taskFacade.destroyTask((int)selectedTask.getId());
 
-            loadTaskFromDatabase();
-            detailContainer.setVisible(false);
-        }
+        loadTaskFromDatabase();
+        detailContainer.setVisible(false);
+    }
 
         private void showEditTaskDialog(Task task) {
         if (task == null) return;

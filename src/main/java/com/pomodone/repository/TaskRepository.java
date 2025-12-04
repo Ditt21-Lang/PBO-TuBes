@@ -1,7 +1,6 @@
 package com.pomodone.repository;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,7 +13,6 @@ import com.pomodone.model.task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
 import java.util.ArrayList; 
 import java.util.List;
 import java.util.Optional;
@@ -22,30 +20,40 @@ import java.util.Optional;
 public class TaskRepository {
     private static final Logger log = LoggerFactory.getLogger(TaskRepository.class);
 
+    private static final String COLUMN_ID = "id";
+    private static final String COLUMN_TITLE = "judul_tugas";
+    private static final String COLUMN_DESCRIPTION = "deskripsi_tugas";
+    private static final String COLUMN_DUE_DATE = "tenggat_tugas";
+    private static final String COLUMN_DIFFICULTY = "tingkat_kesulitan";
+    private static final String COLUMN_STATUS = "status";
+    private static final String COLUMN_CREATED_AT = "created_at";
+    private static final String COLUMN_UPDATED_AT = "updated_at";
+    private static final String SELECT_ALL = "SELECT * FROM ";
+
     public Task findById(long id) {
-        String sql = "SELECT * FROM tasks WHERE id = ?";
+        String sql = SELECT_ALL +"tasks WHERE id = ?";
 
         try (Connection conn = DatabaseConfig.getInstance().getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    Timestamp due = rs.getTimestamp("tenggat_tugas");
+                    Timestamp due = rs.getTimestamp(COLUMN_DUE_DATE);
                     return Task.builder()
-                            .id(rs.getLong("id"))
-                            .title(rs.getString("judul_tugas"))
-                            .description(rs.getString("deskripsi_tugas"))
+                            .id(rs.getLong(COLUMN_ID))
+                            .title(rs.getString(COLUMN_TITLE))
+                            .description(rs.getString(COLUMN_DESCRIPTION))
                             .dueDate(due != null ? due.toLocalDateTime() : null)
-                            .difficulty(TaskDifficulty.valueOf(rs.getString("tingkat_kesulitan")))
-                            .status(TaskStatus.valueOf(rs.getString("status")))
-                            .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
-                            .updatedAt(rs.getTimestamp("updated_at").toLocalDateTime())
+                            .difficulty(TaskDifficulty.valueOf(rs.getString(COLUMN_DIFFICULTY)))
+                            .status(TaskStatus.valueOf(rs.getString(COLUMN_STATUS)))
+                            .createdAt(rs.getTimestamp(COLUMN_CREATED_AT).toLocalDateTime())
+                            .updatedAt(rs.getTimestamp(COLUMN_UPDATED_AT).toLocalDateTime())
                             .build();
                 }
             }
 
         } catch (SQLException e) {
-            log.error("Gagal mencari task dengan id {}", id, e);
+            throw new com.pomodone.exception.DatabaseException("Gagal mencari task dengan id " + id, e);
         }
 
         return null;
@@ -67,14 +75,13 @@ public class TaskRepository {
 
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            log.error("Gagal menyimpan tugas", e);
-            throw new RuntimeException("Gagal menyimpan tugas ke dalam Database:" + e.getMessage(), e);
+            throw new com.pomodone.exception.DatabaseException("Gagal menyimpan tugas ke dalam Database", e);
         }
     } 
 
 
     public Optional<Task> findByTitle(String title) {
-        String sql = "SELECT * FROM tasks WHERE judul_tugas = ?";
+        String sql = SELECT_ALL + "tasks WHERE judul_tugas = ?";
 
         try (Connection conn = DatabaseConfig.getInstance().getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -83,14 +90,14 @@ public class TaskRepository {
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     Task found = Task.builder()
-                                .id(rs.getLong("id"))
-                                .title(rs.getString("judul_tugas"))
-                                .description(rs.getString("deskripsi_tugas"))
-                                .dueDate(rs.getTimestamp("tenggat_tugas") != null ? rs.getTimestamp("tenggat_tugas").toLocalDateTime() : null)
-                                .difficulty(TaskDifficulty.valueOf(rs.getString("tingkat_kesulitan")))
-                                .status(TaskStatus.valueOf(rs.getString("status")))
-                                .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
-                                .updatedAt(rs.getTimestamp("updated_at").toLocalDateTime())
+                                .id(rs.getLong(COLUMN_ID))
+                                .title(rs.getString(COLUMN_TITLE))
+                                .description(rs.getString(COLUMN_DESCRIPTION))
+                                .dueDate(rs.getTimestamp(COLUMN_DUE_DATE) != null ? rs.getTimestamp(COLUMN_DUE_DATE).toLocalDateTime() : null)
+                                .difficulty(TaskDifficulty.valueOf(rs.getString(COLUMN_DIFFICULTY)))
+                                .status(TaskStatus.valueOf(rs.getString(COLUMN_STATUS)))
+                                .createdAt(rs.getTimestamp(COLUMN_CREATED_AT).toLocalDateTime())
+                                .updatedAt(rs.getTimestamp(COLUMN_UPDATED_AT).toLocalDateTime())
                                 .build();
 
                     return Optional.of(found);
@@ -99,8 +106,7 @@ public class TaskRepository {
 
 
         } catch (SQLException e) {
-            log.error("Gagal membuka detail tugas {}", title, e);
-            throw new RuntimeException("Gagal membuka detail tugas ke dalam Database:" + e.getMessage(), e);
+            throw new com.pomodone.exception.DatabaseException("Gagal membuka detail tugas ke dalam Database", e);
         } 
 
         return Optional.empty();
@@ -108,31 +114,31 @@ public class TaskRepository {
 
 
     public List<Task> findAll() {
-        String sql = """
-            SELECT * FROM tasks
-            -- Deadline yang ada diurutkan dulu, yang null disusul belakangan
-            ORDER BY CASE WHEN tenggat_tugas IS NULL THEN 1 ELSE 0 END, tenggat_tugas ASC, created_at DESC
+        String sql = SELECT_ALL + """
+            tasks
+            ORDER BY CASE 
+            WHEN tenggat_tugas IS NULL 
+            THEN 1 ELSE 0 END, tenggat_tugas ASC, created_at DESC
         """;
         List<Task> taskList = new ArrayList<>();
 
         try (Connection conn = DatabaseConfig.getInstance().getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 Task task = Task.builder()
-                            .id(rs.getLong("id"))
-                            .title(rs.getString("judul_tugas"))
-                            .description(rs.getString("deskripsi_tugas"))
-                            .dueDate(rs.getTimestamp("tenggat_tugas") != null ? rs.getTimestamp("tenggat_tugas").toLocalDateTime() : null)
-                            .difficulty(TaskDifficulty.valueOf(rs.getString("tingkat_kesulitan")))
-                            .status(TaskStatus.valueOf(rs.getString("status")))
-                            .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
-                            .updatedAt(rs.getTimestamp("updated_at").toLocalDateTime())
+                            .id(rs.getLong(COLUMN_ID))
+                            .title(rs.getString(COLUMN_TITLE))
+                            .description(rs.getString(COLUMN_DESCRIPTION))
+                            .dueDate(rs.getTimestamp(COLUMN_DUE_DATE) != null ? rs.getTimestamp(COLUMN_DUE_DATE).toLocalDateTime() : null)
+                            .difficulty(TaskDifficulty.valueOf(rs.getString(COLUMN_DIFFICULTY)))
+                            .status(TaskStatus.valueOf(rs.getString(COLUMN_STATUS)))
+                            .createdAt(rs.getTimestamp(COLUMN_CREATED_AT).toLocalDateTime())
+                            .updatedAt(rs.getTimestamp(COLUMN_UPDATED_AT).toLocalDateTime())
                             .build();
 
                 taskList.add(task);
             }
         } catch (SQLException e) {
-            log.error("Gagal memuat daftar tugas", e);
-            throw new RuntimeException("Gagal memuat database." + e.getMessage(), e);
+            throw new com.pomodone.exception.DatabaseException("Gagal memuat database.", e);
         }
 
         return taskList;
@@ -147,7 +153,7 @@ public class TaskRepository {
 
             log.info("Task {} berhasil dihapus", id);
         } catch (Exception e){
-            log.error("Gagal menghapus task {}", id, e);
+            throw new com.pomodone.exception.DatabaseException("Gagal menghapus task " + id, e);
         }
 
     }
@@ -189,7 +195,7 @@ public class TaskRepository {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            log.error("Gagal update task {}", updatedTask.getId(), e);
+            throw new com.pomodone.exception.DatabaseException("Gagal update task " + updatedTask.getId(), e);
         }
     }
 
@@ -201,8 +207,8 @@ public class TaskRepository {
             if (rs.next()) {
                 return rs.getInt(1);
             }
-        } catch (SQLException e) {
-            log.error("Gagal menghitung task aktif", e);
+        } catch (SQLException e)  {
+            throw new com.pomodone.exception.DatabaseException("Gagal menghitung task aktif", e);
         }
         return 0;
     }
@@ -216,7 +222,7 @@ public class TaskRepository {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            log.error("Gagal menghitung task selesai", e);
+            throw new com.pomodone.exception.DatabaseException("Gagal menghitung task selesai", e);
         }
         return 0;
     }
@@ -234,34 +240,30 @@ public class TaskRepository {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            log.error("Gagal menghitung task selesai tepat waktu", e);
+            throw new com.pomodone.exception.DatabaseException("Gagal menghitung task selesai tepat waktu", e);
         }
         return 0;
     }
 
     public List<Task> findTopByDueDate(int limit) {
-        String sql = """
-            SELECT * FROM tasks
-            WHERE status <> 'SELESAI'
-            ORDER BY CASE WHEN tenggat_tugas IS NULL THEN 1 ELSE 0 END, tenggat_tugas ASC, created_at DESC
-            LIMIT ?
-        """;
+        String sql = SELECT_ALL + 
+        "tasks WHERE status <> 'SELESAI' ORDER BY CASE WHEN tenggat_tugas IS NULL THEN 1 ELSE 0 END, tenggat_tugas ASC, created_at DESC LIMIT ? ";
         List<Task> result = new ArrayList<>();
         try (Connection conn = DatabaseConfig.getInstance().getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, Math.max(1, limit));
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    Timestamp due = rs.getTimestamp("tenggat_tugas");
+                    Timestamp due = rs.getTimestamp(COLUMN_DUE_DATE);
                     Task task = Task.builder()
-                            .id(rs.getLong("id"))
-                            .title(rs.getString("judul_tugas"))
-                            .description(rs.getString("deskripsi_tugas"))
+                            .id(rs.getLong(COLUMN_ID))
+                            .title(rs.getString(COLUMN_TITLE))
+                            .description(rs.getString(COLUMN_DESCRIPTION))
                             .dueDate(due != null ? due.toLocalDateTime() : null)
-                            .difficulty(TaskDifficulty.valueOf(rs.getString("tingkat_kesulitan")))
-                            .status(TaskStatus.valueOf(rs.getString("status")))
-                            .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
-                            .updatedAt(rs.getTimestamp("updated_at").toLocalDateTime())
+                            .difficulty(TaskDifficulty.valueOf(rs.getString(COLUMN_DIFFICULTY)))
+                            .status(TaskStatus.valueOf(rs.getString(COLUMN_STATUS)))
+                            .createdAt(rs.getTimestamp(COLUMN_CREATED_AT).toLocalDateTime())
+                            .updatedAt(rs.getTimestamp(COLUMN_UPDATED_AT).toLocalDateTime())
                             .build();
                     result.add(task);
                 }

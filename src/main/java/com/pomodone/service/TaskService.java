@@ -7,10 +7,7 @@ import com.pomodone.model.task.TaskDifficulty;
 import com.pomodone.model.task.TaskStatus;
 import com.pomodone.repository.TaskRepository;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class TaskService {
     private final TaskRepository taskRepository;
