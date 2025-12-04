@@ -107,7 +107,12 @@ public class PomodoroController {
 
     private void setupActionHandlers() {
         startButton.setOnAction(event -> {
-            if (customModeButton.isSelected()) {
+            PomodoroService.TimerState state = pomodoroFacade.timerStateProperty().get();
+            boolean isCustom = customModeButton.isSelected();
+
+            // Hanya apply/persist custom ketika start dari kondisi STOPPED,
+            // supaya pause/resume tidak mereset timer.
+            if (isCustom && state == PomodoroService.TimerState.STOPPED) {
                 validateAllCustomFields();
                 if (!areAllCustomFieldsValid()) {
                     return;
