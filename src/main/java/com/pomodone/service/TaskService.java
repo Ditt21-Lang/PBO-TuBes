@@ -32,11 +32,6 @@ public class TaskService {
         taskRepository.save(newTask);
     }
 
-    public Task getTaskDetail(String title) {
-        return taskRepository.findByTitle(title)
-                .orElseThrow(() -> new IllegalArgumentException("Tugas tidak ditemukan: " + title));
-    }
-
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
     }
