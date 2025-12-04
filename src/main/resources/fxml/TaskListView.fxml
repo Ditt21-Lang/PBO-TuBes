@@ -96,6 +96,13 @@
                 <Label styleClass="settings-label" text="Description"/>
                 <TextArea fx:id="detailDescriptionArea" styleClass="settings-field" editable="false" wrapText="true" VBox.vgrow="ALWAYS"/>
             </VBox>
+
+            <!-- Action Buttons -->
+            <HBox spacing="12.0" alignment="CENTER_RIGHT">
+                <Button fx:id="editTaskButton" text="Edit Task" styleClass="primary-cta"/>
+                <Button fx:id="deleteTaskButton" text="Delete" styleClass="danger-button"/>
+            </HBox>
+
         </VBox>
 
     </HBox>

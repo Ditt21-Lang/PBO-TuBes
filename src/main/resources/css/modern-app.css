@@ -409,3 +409,16 @@
 .primary-cta:hover {
     -fx-background-color: linear-gradient(to right, #0891B2, #0284C7);
 }
+
+.danger-button {
+    -fx-background-color: #EF4444;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+.danger-button:hover {
+    -fx-background-color: #DC2626;
+}

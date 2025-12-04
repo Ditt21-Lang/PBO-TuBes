@@ -1,5 +1,6 @@
 package com.pomodone.view;
 
+import com.pomodone.facade.TaskManagementFacade;
 import com.pomodone.model.task.Task;
 import com.pomodone.model.task.TaskDifficulty;
 import com.pomodone.model.task.TaskStatus;
@@ -58,6 +59,9 @@ public class TaskListController {
     @FXML private Label detailStatusLabel;
     @FXML private Label detailDeadlineLabel;
     @FXML private TextArea detailDescriptionArea;
+    @FXML private Button editTaskButton;
+    @FXML private Button deleteTaskButton;
+
 
     private TaskService taskService;
     private final CollectionViewProcessor<Task> viewProcessor = new CollectionViewProcessor<>();
@@ -66,6 +70,9 @@ public class TaskListController {
     private List<Task> allTasks = new ArrayList<>();
     private String currentSearch = "";
     private final Map<SortChoice, TaskSortStrategy> sortStrategies = new EnumMap<>(SortChoice.class);
+    private Task selectedTask;
+    private final TaskManagementFacade taskFacade = new TaskManagementFacade();
+
 
     @FXML
     public void initialize() {
@@ -80,6 +87,8 @@ public class TaskListController {
         setupSearchField();
         loadTaskFromDatabase();
         applyPendingSearch();
+        deleteTaskButton.setOnAction(e -> handleDeleteTask());
+        editTaskButton.setOnAction(e -> showEditTaskDialog(selectedTask));
     }
 
     private void setupAddButton() {
@@ -104,14 +113,16 @@ public class TaskListController {
     }
 
     private void setupListListener() {
-        taskListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                showTaskDetail(newValue);
+        taskListView.getSelectionModel().selectedItemProperty().addListener((obs, old, newTask) -> {
+            selectedTask = newTask;
+            if (newTask != null) {
+                showTaskDetail(newTask);
             } else {
                 detailContainer.setVisible(false);
             }
         });
     }
+
 
     private void setupListViewCellFactory() {
         taskListView.setCellFactory(listView -> new DashboardTaskCell());
@@ -423,6 +434,89 @@ public class TaskListController {
             taskListView.getSelectionModel().selectFirst();
         }
     }
+    private void handleDeleteTask() {
+        if (selectedTask == null) return;
+
+            taskFacade.destroyTask((int)selectedTask.getId());
+
+            loadTaskFromDatabase();
+            detailContainer.setVisible(false);
+        }
+
+        private void showEditTaskDialog(Task task) {
+        if (task == null) return;
+
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Edit Task");
+        dialog.setHeaderText("Modify your task details");
+
+        ButtonType saveButtonType = new ButtonType("Save Changes", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        // Fields
+        TextField titleField = new TextField(task.getTitle());
+        TextArea descField = new TextArea(task.getDescription());
+        descField.setPrefHeight(100);
+
+        DatePicker datePicker = new DatePicker(task.getDueDate().toLocalDate());
+
+        Spinner<Integer> hourSpinner = new Spinner<>(0, 23, task.getDueDate().getHour());
+        Spinner<Integer> minuteSpinner = new Spinner<>(0, 59, task.getDueDate().getMinute());
+
+        ComboBox<TaskDifficulty> difficultyBox = new ComboBox<>();
+        difficultyBox.getItems().setAll(TaskDifficulty.values());
+        difficultyBox.setValue(task.getDifficulty());
+
+        // UI Layout
+        grid.add(new Label("Title:"), 0, 0);
+        grid.add(titleField, 1, 0);
+        grid.add(new Label("Description:"), 0, 1);
+        grid.add(descField, 1, 1);
+
+        grid.add(new Label("Deadline:"), 0, 2);
+        grid.add(datePicker, 1, 2);
+
+        HBox timeBox = new HBox(6, hourSpinner, new Label(":"), minuteSpinner);
+        grid.add(new Label("Time:"), 0, 3);
+        grid.add(timeBox, 1, 3);
+
+        grid.add(new Label("Difficulty:"), 0, 4);
+        grid.add(difficultyBox, 1, 4);
+
+        dialog.getDialogPane().setContent(grid);
+
+        Platform.runLater(titleField::requestFocus);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == saveButtonType) {
+
+                LocalDate date = datePicker.getValue();
+                LocalTime time = LocalTime.of(hourSpinner.getValue(), minuteSpinner.getValue());
+                LocalDateTime dueDate = LocalDateTime.of(date, time);
+
+                taskFacade.saveTask(
+                        task.getId(),
+                        titleField.getText(),
+                        descField.getText(),
+                        dueDate,
+                        difficultyBox.getValue(),
+                        task.getStatus()
+                );
+
+                loadTaskFromDatabase();
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
+    }
+
+
 
     private enum SortChoice {
         NAME_ASC,
