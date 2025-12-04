@@ -1,27 +1,32 @@
 package com.pomodone.view;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.pomodone.facade.PomodoroFacade;
 import com.pomodone.model.pomodoro.CustomPomodoroPreset;
 import com.pomodone.model.pomodoro.PomodoroSettings;
-import com.pomodone.service.PomodoroService;
 import com.pomodone.service.CustomPomodoroPresetService;
+import com.pomodone.service.PomodoroService;
 import com.pomodone.strategy.pomodoro.ClassicPomodoroStrategy;
 import com.pomodone.strategy.pomodoro.IntensePomodoroStrategy;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PomodoroController {
     private static final Logger log = LoggerFactory.getLogger(PomodoroController.class);
-    private static final String FIELD_ERROR_STYLE = "field-error";
-    private static final String MINUTES_SUFFIX = " minutes";
 
     @FXML private Label statusLabel;
     @FXML private Label hoursLabel;
@@ -93,9 +98,9 @@ public class PomodoroController {
             inputFieldsGridPane.setDisable(!isStopped);
 
             switch (newState) {
-                case STOPPED: startButton.setText("Start"); break;
-                case RUNNING: startButton.setText("Pause"); break;
-                case PAUSED: startButton.setText("Resume"); break;
+                case STOPPED -> startButton.setText("Start");
+                case RUNNING -> startButton.setText("Pause");
+                case PAUSED -> startButton.setText("Resume");
             }
         });
         
@@ -148,23 +153,37 @@ public class PomodoroController {
         boolean isCustomMode = customModeButton.isSelected();
         boolean areCustomFieldsInvalid = !isFocusValid.get() || !isShortBreakValid.get() || !isLongBreakValid.get() || !isRoundsValid.get();
         
-        startButton.setDisable(isCustomMode && areCustomFieldsInvalid);
+        if (isCustomMode && areCustomFieldsInvalid) {
+            startButton.setDisable(true);
+        } else {
+            startButton.setDisable(false);
+        }
     }
 
     private void setupValidationListeners() {
-        setupFieldValidation(customFocusField, isFocusValid, focusErrorLabel, false);
-        setupFieldValidation(customShortBreakField, isShortBreakValid, shortBreakErrorLabel, true);
-        setupFieldValidation(customLongBreakField, isLongBreakValid, longBreakErrorLabel, true);
-        setupFieldValidation(customRoundsField, isRoundsValid, roundsErrorLabel, false);
-    }
-
-    private void setupFieldValidation(TextField field, BooleanProperty validProperty, Label errorLabel, boolean allowZero) {
-        field.textProperty().addListener((obs, oldV, newV) -> {
-            boolean isValid = validatePositiveInteger(newV, field, errorLabel, allowZero);
-            if (validProperty.get() != isValid) {
-                validProperty.set(isValid);
+        customFocusField.textProperty().addListener((obs, oldV, newV) -> {
+            if (isFocusValid.get() != validatePositiveInteger(newV, customFocusField, focusErrorLabel, false)) {
+                isFocusValid.set(!isFocusValid.get());
             }
-            if (validProperty.get()) applyCustomSettings();
+            if (isFocusValid.get()) applyCustomSettings();
+        });
+        customShortBreakField.textProperty().addListener((obs, oldV, newV) -> {
+            if (isShortBreakValid.get() != validatePositiveInteger(newV, customShortBreakField, shortBreakErrorLabel, true)) {
+                isShortBreakValid.set(!isShortBreakValid.get());
+            }
+            if(isShortBreakValid.get()) applyCustomSettings();
+        });
+        customLongBreakField.textProperty().addListener((obs, oldV, newV) -> {
+            if (isLongBreakValid.get() != validatePositiveInteger(newV, customLongBreakField, longBreakErrorLabel, true)) {
+                isLongBreakValid.set(!isLongBreakValid.get());
+            }
+            if(isLongBreakValid.get()) applyCustomSettings();
+        });
+        customRoundsField.textProperty().addListener((obs, oldV, newV) -> {
+            if (isRoundsValid.get() != validatePositiveInteger(newV, customRoundsField, roundsErrorLabel, false)) {
+                isRoundsValid.set(!isRoundsValid.get());
+            }
+            if(isRoundsValid.get()) applyCustomSettings();
         });
     }
     
@@ -196,9 +215,9 @@ public class PomodoroController {
         errorLabel.setVisible(showError);
         errorLabel.setManaged(showError);
         if (showError) {
-            if (!field.getStyleClass().contains(FIELD_ERROR_STYLE)) field.getStyleClass().add(FIELD_ERROR_STYLE);
+            if (!field.getStyleClass().contains("field-error")) field.getStyleClass().add("field-error");
         } else {
-            field.getStyleClass().remove(FIELD_ERROR_STYLE);
+            field.getStyleClass().remove("field-error");
         }
     }
     
@@ -222,26 +241,24 @@ public class PomodoroController {
         
         PomodoroSettings settings;
         switch (mode) {
-            case CLASSIC:
+            case CLASSIC -> {
                 settings = new ClassicPomodoroStrategy().getSettings();
                 settingsTitleLabel.setText("Classic Settings");
                 populateDisplayLabels(settings);
-                break;
-            case INTENSE:
+            }
+            case INTENSE -> {
                 settings = new IntensePomodoroStrategy().getSettings();
                 settingsTitleLabel.setText("Intense Settings");
                 populateDisplayLabels(settings);
-                break;
-            default:
-                settingsTitleLabel.setText("Custom Settings");
-                break;
+            }
+            default -> settingsTitleLabel.setText("Custom Settings");
         }
     }
     
     private void populateDisplayLabels(PomodoroSettings settings) {
-        displayFocusLabel.setText(settings.getFocusDuration().toMinutes() + MINUTES_SUFFIX);
-        displayShortBreakLabel.setText(settings.getShortBreakDuration().toMinutes() + MINUTES_SUFFIX);
-        displayLongBreakLabel.setText(settings.getLongBreakDuration().toMinutes() + MINUTES_SUFFIX);
+        displayFocusLabel.setText(settings.getFocusDuration().toMinutes() + " minutes");
+        displayShortBreakLabel.setText(settings.getShortBreakDuration().toMinutes() + " minutes");
+        displayLongBreakLabel.setText(settings.getLongBreakDuration().toMinutes() + " minutes");
         displayRoundsLabel.setText(String.valueOf(settings.getRoundsBeforeLongBreak()));
     }
 

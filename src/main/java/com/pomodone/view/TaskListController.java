@@ -1,33 +1,5 @@
 package com.pomodone.view;
 
-import com.pomodone.facade.TaskManagementFacade;
-import com.pomodone.model.task.Task;
-import com.pomodone.model.task.TaskDifficulty;
-import com.pomodone.model.task.TaskStatus;
-import com.pomodone.service.TaskService;
-import com.pomodone.util.CollectionViewProcessor;
-import com.pomodone.util.SortDirection;
-import com.pomodone.strategy.task.TaskSortStrategy;
-import com.pomodone.strategy.task.NameAscSortStrategy;
-import com.pomodone.strategy.task.NameDescSortStrategy;
-import com.pomodone.strategy.task.DueDateAscSortStrategy;
-import com.pomodone.strategy.task.DueDateDescSortStrategy;
-import com.pomodone.strategy.task.DifficultyAscSortStrategy;
-import com.pomodone.strategy.task.DifficultyDescSortStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.*;
-import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -38,6 +10,51 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.pomodone.facade.TaskManagementFacade;
+import com.pomodone.model.task.Task;
+import com.pomodone.model.task.TaskDifficulty;
+import com.pomodone.model.task.TaskStatus;
+import com.pomodone.service.TaskService;
+import com.pomodone.strategy.task.DifficultyAscSortStrategy;
+import com.pomodone.strategy.task.DifficultyDescSortStrategy;
+import com.pomodone.strategy.task.DueDateAscSortStrategy;
+import com.pomodone.strategy.task.DueDateDescSortStrategy;
+import com.pomodone.strategy.task.NameAscSortStrategy;
+import com.pomodone.strategy.task.NameDescSortStrategy;
+import com.pomodone.strategy.task.TaskSortStrategy;
+import com.pomodone.util.CollectionViewProcessor;
+import com.pomodone.util.SortDirection;
+
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 
 public class TaskListController {
     private static final Logger log = LoggerFactory.getLogger(TaskListController.class);
@@ -498,7 +515,7 @@ public class TaskListController {
         }
     }
 
-        private void showEditTaskDialog(Task task) {
+    private void showEditTaskDialog(Task task) {
         if (task == null) return;
 
         Dialog<Void> dialog = new Dialog<>();
@@ -518,18 +535,46 @@ public class TaskListController {
         TextArea descField = new TextArea(task.getDescription());
         descField.setPrefHeight(100);
 
-        DatePicker datePicker = new DatePicker(task.getDueDate().toLocalDate());
+        LocalDateTime due = task.getDueDate();
 
-        Spinner<Integer> hourSpinner = new Spinner<>(0, 23, task.getDueDate().getHour());
-        Spinner<Integer> minuteSpinner = new Spinner<>(0, 59, task.getDueDate().getMinute());
+        DatePicker datePicker = new DatePicker(
+                due != null ? due.toLocalDate() : null
+        );
+
+        Spinner<Integer> hourSpinner = new Spinner<>(0, 23,
+                due != null ? due.getHour() : 12
+        );
+        Spinner<Integer> minuteSpinner = new Spinner<>(0, 59,
+                due != null ? due.getMinute() : 0
+        );
+
+        // Disable time if no date
+        boolean hasDate = (due != null);
+        hourSpinner.setDisable(!hasDate);
+        minuteSpinner.setDisable(!hasDate);
+
+        // Auto-disable time if date cleared
+        datePicker.valueProperty().addListener((obs, oldV, newV) -> {
+            boolean enabled = newV != null;
+
+            hourSpinner.setDisable(!enabled);
+            minuteSpinner.setDisable(!enabled);
+
+            if (!enabled) {
+                // Reset spinner when no date
+                hourSpinner.getValueFactory().setValue(12);
+                minuteSpinner.getValueFactory().setValue(0);
+            }
+        });
 
         ComboBox<TaskDifficulty> difficultyBox = new ComboBox<>();
         difficultyBox.getItems().setAll(TaskDifficulty.values());
         difficultyBox.setValue(task.getDifficulty());
 
-        // UI Layout
+        // Layout
         grid.add(new Label("Title:"), 0, 0);
         grid.add(titleField, 1, 0);
+
         grid.add(new Label("Description:"), 0, 1);
         grid.add(descField, 1, 1);
 
@@ -551,8 +596,12 @@ public class TaskListController {
             if (dialogButton == saveButtonType) {
 
                 LocalDate date = datePicker.getValue();
-                LocalTime time = LocalTime.of(hourSpinner.getValue(), minuteSpinner.getValue());
-                LocalDateTime dueDate = LocalDateTime.of(date, time);
+                LocalDateTime dueDate = null;
+
+                if (date != null) {
+                    LocalTime time = LocalTime.of(hourSpinner.getValue(), minuteSpinner.getValue());
+                    dueDate = LocalDateTime.of(date, time);
+                }
 
                 taskFacade.saveTask(
                         task.getId(),
@@ -570,6 +619,7 @@ public class TaskListController {
 
         dialog.showAndWait();
     }
+
 
 
 

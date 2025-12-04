@@ -78,7 +78,7 @@ public class Task {
                 .id(this.id)
                 .title(Objects.requireNonNullElse(updated.title, this.title))
                 .description(Objects.requireNonNullElse(updated.description, this.description))
-                .dueDate(updated.dueDate != null ? updated.dueDate : this.dueDate)
+                .dueDate(updated.dueDate)
                 .difficulty(updated.difficulty != null ? updated.difficulty : this.difficulty)
                 .status(updated.status != null ? updated.status : this.status)
                 .createdAt(this.createdAt)
