@@ -37,7 +37,11 @@ public class PomodoroService {
     private int roundsCompleted = 0;
     private Media alarmSound;
     private LocalDateTime sessionStartedAt;
-    private final PomodoroSessionService sessionService = new PomodoroSessionService();
+    private PomodoroSessionService sessionService = new PomodoroSessionService();
+
+    public void setSessionService(PomodoroSessionService sessionService) {
+        this.sessionService = sessionService;
+    }
 
     // Property yang bisa di-observe buat UI
     private final ReadOnlyStringWrapper hours = new ReadOnlyStringWrapper("00");
