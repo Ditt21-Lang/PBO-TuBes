@@ -16,7 +16,7 @@
     <HBox alignment="CENTER_LEFT" spacing="16.0">
         <VBox>
             <Label styleClass="header-title" text="Dashboard"/>
-            <Label fx:id="headerSubtitle" styleClass="header-subtitle" text="Welcome back, let's be productive!"/>
+            <Label fx:id="headerSubtitle" styleClass="header-subtitle" style="-fx-font-size: 18px;" text="Welcome back, let's be productive!"/>
         </VBox>
         <Region HBox.hgrow="ALWAYS"/>
         <HBox alignment="CENTER_LEFT" spacing="16.0">

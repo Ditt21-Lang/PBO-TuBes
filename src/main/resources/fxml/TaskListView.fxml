@@ -29,7 +29,7 @@
 
     <HBox spacing="20.0" VBox.vgrow="ALWAYS">
         
-        <StackPane styleClass="task-card" prefWidth="580.0" prefHeight="660.0" HBox.hgrow="ALWAYS">
+        <StackPane styleClass="task-card" prefWidth="580.0" prefHeight="600.0" HBox.hgrow="ALWAYS">
             <VBox spacing="12.0">
                  <padding>
                     <Insets top="20" right="20" bottom="20" left="20"/>
@@ -61,6 +61,7 @@
                     <RadioButton fx:id="sortNameDescRadio" text="Name: Z to A" />
                     <RadioButton fx:id="sortDueSoonRadio" text="Due: Soonest" />
                     <RadioButton fx:id="sortDueLateRadio" text="Due: Latest" />
+                    <RadioButton fx:id="sortDifficultyAscRadio" text="Difficulty: Low to High" />
                     <RadioButton fx:id="sortDifficultyDescRadio" text="Difficulty: High to Low" />
                 </VBox>
                 <Separator/>
@@ -74,7 +75,7 @@
             </VBox>
         </StackPane>
 
-        <VBox fx:id="detailContainer" styleClass="task-card" spacing="16.0" prefHeight="660.0" HBox.hgrow="ALWAYS" visible="false">
+        <VBox fx:id="detailContainer" styleClass="task-card" spacing="16.0" prefHeight="600.0" HBox.hgrow="ALWAYS" visible="false">
             <padding>
                 <Insets top="30" right="30" bottom="30" left="30"/>
             </padding>
@@ -99,6 +100,7 @@
 
             <!-- Action Buttons -->
             <HBox spacing="12.0" alignment="CENTER_RIGHT">
+                <Button fx:id="markDoneButton" text="Mark as done" styleClass="primary-cta"/>
                 <Button fx:id="editTaskButton" text="Edit Task" styleClass="primary-cta"/>
                 <Button fx:id="deleteTaskButton" text="Delete" styleClass="danger-button"/>
             </HBox>

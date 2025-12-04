@@ -13,10 +13,10 @@ import java.util.Optional;
 
 public class UserRepository {
     private static final Logger log = LoggerFactory.getLogger(UserRepository.class);
-    private static final String SELECT_ALL = "SELECT * FROM";
+    private static final String SELECT_ALL = "SELECT * FROM ";
 
     public Optional<User> findById(long id) {
-        String sql =  SELECT_ALL + "users WHERE id = ?";
+        String sql = SELECT_ALL + "users WHERE id = ?";
         try (Connection conn = DatabaseConfig.getInstance().getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 

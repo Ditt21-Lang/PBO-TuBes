@@ -12,6 +12,7 @@ import com.pomodone.strategy.task.NameAscSortStrategy;
 import com.pomodone.strategy.task.NameDescSortStrategy;
 import com.pomodone.strategy.task.DueDateAscSortStrategy;
 import com.pomodone.strategy.task.DueDateDescSortStrategy;
+import com.pomodone.strategy.task.DifficultyAscSortStrategy;
 import com.pomodone.strategy.task.DifficultyDescSortStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,7 @@ public class TaskListController {
     @FXML private RadioButton sortNameDescRadio;
     @FXML private RadioButton sortDueSoonRadio;
     @FXML private RadioButton sortDueLateRadio;
+    @FXML private RadioButton sortDifficultyAscRadio;
     @FXML private RadioButton sortDifficultyDescRadio;
     
     private static final String STYLE_PRIORITY_HIGH = "task-item-priority-high";
@@ -67,6 +69,7 @@ public class TaskListController {
     @FXML private TextArea detailDescriptionArea;
     @FXML private Button editTaskButton;
     @FXML private Button deleteTaskButton;
+    @FXML private Button markDoneButton;
 
 
     private TaskService taskService;
@@ -95,6 +98,7 @@ public class TaskListController {
         applyPendingSearch();
         deleteTaskButton.setOnAction(e -> handleDeleteTask());
         editTaskButton.setOnAction(e -> showEditTaskDialog(selectedTask));
+        markDoneButton.setOnAction(e -> handleMarkDone());
     }
 
     private void setupAddButton() {
@@ -125,6 +129,7 @@ public class TaskListController {
                 showTaskDetail(newTask);
             } else {
                 detailContainer.setVisible(false);
+                markDoneButton.setDisable(true);
             }
         });
     }
@@ -245,6 +250,7 @@ public class TaskListController {
         sortNameDescRadio.setToggleGroup(sortToggleGroup);
         sortDueSoonRadio.setToggleGroup(sortToggleGroup);
         sortDueLateRadio.setToggleGroup(sortToggleGroup);
+        sortDifficultyAscRadio.setToggleGroup(sortToggleGroup);
         sortDifficultyDescRadio.setToggleGroup(sortToggleGroup);
 
         // default: due date terdekat lebih dulu
@@ -257,6 +263,7 @@ public class TaskListController {
         sortStrategies.put(SortChoice.NAME_DESC, new NameDescSortStrategy());
         sortStrategies.put(SortChoice.DUE_DATE_ASC, new DueDateAscSortStrategy());
         sortStrategies.put(SortChoice.DUE_DATE_DESC, new DueDateDescSortStrategy());
+        sortStrategies.put(SortChoice.DIFFICULTY_ASC, new DifficultyAscSortStrategy());
         sortStrategies.put(SortChoice.DIFFICULTY_DESC, new DifficultyDescSortStrategy());
     }
 
@@ -285,6 +292,7 @@ public class TaskListController {
         if (sortNameDescRadio.isSelected()) return SortChoice.NAME_DESC;
         if (sortDueSoonRadio.isSelected()) return SortChoice.DUE_DATE_ASC;
         if (sortDueLateRadio.isSelected()) return SortChoice.DUE_DATE_DESC;
+        if (sortDifficultyAscRadio.isSelected()) return SortChoice.DIFFICULTY_ASC;
         if (sortDifficultyDescRadio.isSelected()) return SortChoice.DIFFICULTY_DESC;
         // default fallback
         return SortChoice.DUE_DATE_ASC;
@@ -374,6 +382,7 @@ public class TaskListController {
     private void showTaskDetail(Task task) {
         if (task == null) {
             detailContainer.setVisible(false);
+            markDoneButton.setDisable(true);
             return;
         }
 
@@ -396,6 +405,8 @@ public class TaskListController {
 
         detailDescriptionArea.setText(task.getDescription());
         detailContainer.setVisible(true);
+        markDoneButton.setDisable(false);
+        updateMarkButtonLabel(task);
     }
 
     private void loadTaskFromDatabase() {
@@ -449,6 +460,42 @@ public class TaskListController {
 
         loadTaskFromDatabase();
         detailContainer.setVisible(false);
+    }
+
+    private void handleMarkDone() {
+        if (selectedTask == null) return;
+
+        TaskStatus targetStatus = selectedTask.getStatus() == TaskStatus.SELESAI
+                ? resolveUndoStatus(selectedTask)
+                : TaskStatus.SELESAI;
+
+        taskFacade.saveTask(
+                selectedTask.getId(),
+                selectedTask.getTitle(),
+                selectedTask.getDescription(),
+                selectedTask.getDueDate(),
+                selectedTask.getDifficulty(),
+                targetStatus
+        );
+
+        loadTaskFromDatabase();
+        detailContainer.setVisible(false);
+    }
+
+    private TaskStatus resolveUndoStatus(Task task) {
+        LocalDateTime now = LocalDateTime.now();
+        if (task.getDueDate() == null || task.getDueDate().isAfter(now)) {
+            return TaskStatus.BELUM_SELESAI;
+        }
+        return TaskStatus.TERLAMBAT;
+    }
+
+    private void updateMarkButtonLabel(Task task) {
+        if (task.getStatus() == TaskStatus.SELESAI) {
+            markDoneButton.setText("Mark as not done");
+        } else {
+            markDoneButton.setText("Mark as done");
+        }
     }
 
         private void showEditTaskDialog(Task task) {
@@ -531,6 +578,7 @@ public class TaskListController {
         NAME_DESC,
         DUE_DATE_ASC,
         DUE_DATE_DESC,
+        DIFFICULTY_ASC,
         DIFFICULTY_DESC
     }
 }

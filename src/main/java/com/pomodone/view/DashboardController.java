@@ -3,6 +3,8 @@ package com.pomodone.view;
 import com.pomodone.model.dashboard.DashboardStats;
 import com.pomodone.service.DashboardStatsService;
 import com.pomodone.service.TaskService;
+import com.pomodone.service.UserSettingsService;
+import com.pomodone.model.user.User;
 import com.pomodone.model.task.Task;
 import com.pomodone.model.task.TaskDifficulty;
 import com.pomodone.model.task.TaskStatus;
@@ -14,9 +16,12 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 public class DashboardController {
 
@@ -29,6 +34,7 @@ public class DashboardController {
 
     private final DashboardStatsService statsService = new DashboardStatsService();
     private final TaskService taskService = new TaskService();
+    private final UserSettingsService userSettingsService = new UserSettingsService();
     private final DateTimeFormatter dueFormatter = DateTimeFormatter.ofPattern("dd MMM HH:mm", Locale.forLanguageTag("id-ID"));
 
     @FXML
@@ -43,7 +49,7 @@ public class DashboardController {
         dailyPomodoroLabel.setText(formatPomodoroProgress(stats));
         activeTasksLabel.setText(String.valueOf(stats.getActiveTasks()));
         productivityLabel.setText(stats.getProductivityPercent() + "%");
-        headerSubtitle.setText("Welcome back, let's be productive!");
+        headerSubtitle.setText(buildGreeting());
     }
 
     private void setupSearchHandler() {
@@ -130,5 +136,37 @@ public class DashboardController {
             return done + " / " + target;
         }
         return String.valueOf(done);
+    }
+
+    private String buildGreeting() {
+        String prefix = resolveGreetingPrefix();
+        String name = resolveUserName();
+        return prefix + ", " + name;
+    }
+
+    private String resolveGreetingPrefix() {
+        ZonedDateTime now = currentTimeWithFallback();
+        int hour = now.getHour();
+
+        if (hour >= 4 && hour < 11) return "Selamat Pagi";
+        if (hour >= 11 && hour < 15) return "Selamat Siang";
+        if (hour >= 15 && hour < 18) return "Selamat Sore";
+        return "Selamat Malam";
+    }
+
+    private ZonedDateTime currentTimeWithFallback() {
+        try {
+            return ZonedDateTime.now(ZoneId.systemDefault());
+        } catch (Exception e) {
+            return ZonedDateTime.now(ZoneId.of("Asia/Jakarta"));
+        }
+    }
+
+    private String resolveUserName() {
+        Optional<User> user = userSettingsService.getCurrentUserSettings();
+        return user.map(User::getName)
+                .map(String::trim)
+                .filter(name -> !name.isEmpty())
+                .orElse("Kamu");
     }
 }
