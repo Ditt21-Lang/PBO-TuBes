@@ -7,11 +7,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Objects;
 
 public class MainWindowController {
+    private static final Logger log = LoggerFactory.getLogger(MainWindowController.class);
 
     @FXML
     private ScrollPane contentPane;
@@ -61,7 +64,7 @@ public class MainWindowController {
             Parent view = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/fxml/" + fxmlFile)));
             contentPane.setContent(view);
         } catch (IOException | NullPointerException e) {
-            e.printStackTrace();
+            log.error("Gagal memuat FXML {}", fxmlFile, e);
             Label errorLabel = new Label("Error: failed to load " + fxmlFile);
             contentPane.setContent(errorLabel);
         }

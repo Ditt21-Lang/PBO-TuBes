@@ -13,6 +13,8 @@ import com.pomodone.strategy.task.NameDescSortStrategy;
 import com.pomodone.strategy.task.DueDateAscSortStrategy;
 import com.pomodone.strategy.task.DueDateDescSortStrategy;
 import com.pomodone.strategy.task.DifficultyDescSortStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -37,6 +39,7 @@ import java.util.Locale;
 import java.util.Map;
 
 public class TaskListController {
+    private static final Logger log = LoggerFactory.getLogger(TaskListController.class);
 
     @FXML private ListView<Task> taskListView;
     @FXML private Button addTaskButton;
@@ -350,7 +353,7 @@ public class TaskListController {
                     taskService.createNewTask(title, desc, dueDate, diff);
                     return null;
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("Gagal menyimpan task baru", e);
                     Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to save: " + e.getMessage());
                     alert.show();
                     return null;
@@ -395,7 +398,7 @@ public class TaskListController {
             allTasks = taskService.getAllTasks();
             refreshTaskList();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Gagal memuat task dari database", e);
         }
     }
 

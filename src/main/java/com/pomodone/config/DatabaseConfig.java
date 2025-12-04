@@ -3,6 +3,8 @@ package com.pomodone.config;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.flywaydb.core.Flyway;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -15,6 +17,7 @@ import java.util.Map;
 
 public class DatabaseConfig {
     private static volatile DatabaseConfig instance;
+    private static final Logger log = LoggerFactory.getLogger(DatabaseConfig.class);
     private final DataSource dataSource;
 
     private DatabaseConfig() {
@@ -37,7 +40,7 @@ public class DatabaseConfig {
                 throw new RuntimeException("Gagal inisialisasi SQLite: " + e.getMessage(), e);
             }
             // Koneksi utama gagal (URL salah/psql down), pakai SQLite sebagai fallback lokal
-            System.err.println("Koneksi DB utama gagal, fallback ke SQLite. Penyebab: " + e.getMessage());
+            log.warn("Koneksi DB utama gagal, fallback ke SQLite: {}", e.getMessage());
             String fallbackUrl = "jdbc:sqlite:./pomodone.db";
             DataSource fallback = buildDataSource(fallbackUrl, null, null);
             runMigrations(fallback);

@@ -2,6 +2,8 @@ package com.pomodone.repository;
 
 import com.pomodone.config.DatabaseConfig;
 import com.pomodone.model.pomodoro.CustomPomodoroPreset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class PomodoroPresetRepository {
+    private static final Logger log = LoggerFactory.getLogger(PomodoroPresetRepository.class);
 
     public CustomPomodoroPreset findLatestByUser(long userId) {
         String sql = """
@@ -29,7 +32,7 @@ public class PomodoroPresetRepository {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Gagal mengambil preset custom user {}", userId, e);
         }
         return null;
     }
@@ -58,8 +61,8 @@ public class PomodoroPresetRepository {
             pstmt.setInt(6, preset.getRounds());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Gagal menyimpan custom pomodoro preset: " + e.getMessage());
+            log.error("Gagal upsert preset custom user {}", userId, e);
+            throw new RuntimeException("Gagal menyimpan custom pomodoro preset: " + e.getMessage(), e);
         }
     }
 

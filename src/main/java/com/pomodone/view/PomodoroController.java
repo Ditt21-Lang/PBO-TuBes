@@ -15,8 +15,11 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PomodoroController {
+    private static final Logger log = LoggerFactory.getLogger(PomodoroController.class);
 
     @FXML private Label statusLabel;
     @FXML private Label hoursLabel;
@@ -260,7 +263,7 @@ public class PomodoroController {
                 int rounds = Integer.parseInt(customRoundsField.getText());
                 pomodoroFacade.applyCustomSettings(focusMin, shortBreakMin, longBreakMin, rounds);
             } catch (NumberFormatException e) {
-                System.err.println("Invalid custom settings input despite validation.");
+                log.warn("Input custom settings tidak valid meski lolos validasi awal");
             }
         }
     }

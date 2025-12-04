@@ -11,6 +11,8 @@ import com.pomodone.config.DatabaseConfig;
 import com.pomodone.model.task.Task;
 import com.pomodone.model.task.TaskDifficulty;
 import com.pomodone.model.task.TaskStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList; 
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class TaskRepository {
+    private static final Logger log = LoggerFactory.getLogger(TaskRepository.class);
 
     public Task findById(long id) {
         String sql = "SELECT * FROM tasks WHERE id = ?";
@@ -42,7 +45,7 @@ public class TaskRepository {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Gagal mencari task dengan id {}", id, e);
         }
 
         return null;
@@ -64,8 +67,8 @@ public class TaskRepository {
 
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Gagal menyimpan tugas ke dalam Database:" + e.getMessage());
+            log.error("Gagal menyimpan tugas", e);
+            throw new RuntimeException("Gagal menyimpan tugas ke dalam Database:" + e.getMessage(), e);
         }
     } 
 
@@ -96,8 +99,8 @@ public class TaskRepository {
 
 
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Gagal membuka detail tugas ke dalam Database:" + e.getMessage());
+            log.error("Gagal membuka detail tugas {}", title, e);
+            throw new RuntimeException("Gagal membuka detail tugas ke dalam Database:" + e.getMessage(), e);
         } 
 
         return Optional.empty();
@@ -128,8 +131,8 @@ public class TaskRepository {
                 taskList.add(task);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Gagal memuat database." + e.getMessage());
+            log.error("Gagal memuat daftar tugas", e);
+            throw new RuntimeException("Gagal memuat database." + e.getMessage(), e);
         }
 
         return taskList;
@@ -142,9 +145,9 @@ public class TaskRepository {
             stmt.setInt(1, id);
             stmt.executeUpdate();
 
-            System.out.println("Task dengan nama Berhasil Dihapus");
+            log.info("Task {} berhasil dihapus", id);
         } catch (Exception e){
-            e.printStackTrace();
+            log.error("Gagal menghapus task {}", id, e);
         }
 
     }
@@ -186,7 +189,7 @@ public class TaskRepository {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Gagal update task {}", updatedTask.getId(), e);
         }
     }
 
@@ -199,7 +202,7 @@ public class TaskRepository {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Gagal menghitung task aktif", e);
         }
         return 0;
     }
@@ -213,7 +216,7 @@ public class TaskRepository {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Gagal menghitung task selesai", e);
         }
         return 0;
     }
@@ -231,7 +234,7 @@ public class TaskRepository {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Gagal menghitung task selesai tepat waktu", e);
         }
         return 0;
     }
@@ -264,7 +267,7 @@ public class TaskRepository {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Gagal mengambil task teratas berdasarkan tenggat", e);
         }
         return result;
     }

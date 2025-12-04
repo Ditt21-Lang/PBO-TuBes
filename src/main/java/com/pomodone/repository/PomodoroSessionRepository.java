@@ -2,6 +2,8 @@ package com.pomodone.repository;
 
 import com.pomodone.config.DatabaseConfig;
 import com.pomodone.service.PomodoroService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +13,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 public class PomodoroSessionRepository {
+    private static final Logger log = LoggerFactory.getLogger(PomodoroSessionRepository.class);
 
     public void insertCompletedSession(long userId, LocalDateTime startedAt, LocalDateTime endedAt, long durationSeconds, PomodoroService.PomodoroMode mode) {
         String sql = """
@@ -29,8 +32,8 @@ public class PomodoroSessionRepository {
             pstmt.setString(5, mode.name());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Gagal menyimpan sesi pomodoro: " + e.getMessage());
+            log.error("Gagal menyimpan sesi pomodoro", e);
+            throw new RuntimeException("Gagal menyimpan sesi pomodoro: " + e.getMessage(), e);
         }
     }
 
@@ -49,7 +52,7 @@ public class PomodoroSessionRepository {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Gagal menghitung sesi pomodoro", e);
         }
         return 0;
     }

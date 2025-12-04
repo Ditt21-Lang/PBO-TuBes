@@ -12,12 +12,15 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import javafx.animation.Animation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.time.LocalDateTime;
 
 public class PomodoroService {
     private static PomodoroService instance;
+    private static final Logger log = LoggerFactory.getLogger(PomodoroService.class);
 
     public enum TimerState { STOPPED, RUNNING, PAUSED }
     public enum SessionType { FOCUS, SHORT_BREAK, LONG_BREAK }
@@ -60,11 +63,10 @@ public class PomodoroService {
             if (resource != null) {
                 alarmSound = new Media(resource.toExternalForm());
             } else {
-                System.err.println("Suara alarm ga ketemu.");
+                log.warn("Suara alarm tidak ditemukan");
             }
         } catch (Exception e) {
-            System.err.println("Gagal load suara alarm.");
-            e.printStackTrace();
+            log.error("Gagal load suara alarm", e);
         }
     }
 
@@ -107,7 +109,7 @@ public class PomodoroService {
             this.pomodoroMode.set(PomodoroMode.CUSTOM);
             stopAndResetTimer();
         } catch (IllegalArgumentException e) {
-            System.err.println("Error pas apply custom settings: " + e.getMessage());
+            log.warn("Gagal apply custom settings: {}", e.getMessage());
         }
     }
 
@@ -194,7 +196,7 @@ public class PomodoroService {
             alarmDurationTimer.setCycleCount(1);
             alarmDurationTimer.play();
         } else {
-            System.err.println("Suara alarm ga ke-load. Lanjut tanpa alarm.");
+            log.warn("Suara alarm tidak termuat, lanjut tanpa alarm");
             if (onAlarmFinished != null) {
                 onAlarmFinished.run();
             }

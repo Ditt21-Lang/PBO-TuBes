@@ -2,6 +2,8 @@ package com.pomodone.repository;
 
 import com.pomodone.config.DatabaseConfig;
 import com.pomodone.model.user.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,6 +12,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 public class UserRepository {
+    private static final Logger log = LoggerFactory.getLogger(UserRepository.class);
 
     public Optional<User> findById(long id) {
         String sql = "SELECT * FROM users WHERE id = ?";
@@ -29,8 +32,7 @@ public class UserRepository {
                 return Optional.of(user);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            // harusnya pake logger
+            log.error("Gagal mengambil user {}", id, e);
         }
         return Optional.empty();
     }
@@ -45,7 +47,7 @@ public class UserRepository {
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Gagal update nama user {}", id, e);
             return false;
         }
     }
@@ -61,7 +63,7 @@ public class UserRepository {
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Gagal update target user {}", id, e);
             return false;
         }
     }

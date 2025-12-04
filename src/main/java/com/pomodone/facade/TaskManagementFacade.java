@@ -5,9 +5,12 @@ import java.time.LocalDateTime;
 import com.pomodone.model.task.TaskDifficulty;
 import com.pomodone.model.task.TaskStatus;
 import com.pomodone.service.TaskService; 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TaskManagementFacade {
     private final TaskService taskService;
+    private static final Logger log = LoggerFactory.getLogger(TaskManagementFacade.class);
 
     public TaskManagementFacade() {
         this.taskService = new TaskService();
@@ -22,7 +25,7 @@ public class TaskManagementFacade {
     }
 
     public void saveTask(long id, String newTitle, String newDescription,LocalDateTime newDueDate, TaskDifficulty newDifficulty, TaskStatus newStatus){
-        System.out.println("SAVING TASK");
+        log.info("Menyimpan perubahan task {}", id);
         taskService.updateTask(id, newTitle, newDescription, newDueDate, newDifficulty, newStatus);
 
     }

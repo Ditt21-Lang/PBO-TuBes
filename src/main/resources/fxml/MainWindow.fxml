@@ -13,7 +13,7 @@
             prefHeight="800.0"
             xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            stylesheets="@/css/modern-app.css"
+            stylesheets="@/css/style.css"
             fx:controller="com.pomodone.view.MainWindowController">
 
     <!-- Sidebar -->
