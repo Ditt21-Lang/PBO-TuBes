@@ -22,7 +22,8 @@ public class DatabaseConfig {
 
     private DatabaseConfig() {
         Map<String, String> env = loadEnv();
-        String url = firstNonEmpty(env.get("DB_URL"), "jdbc:sqlite:./pomodone.db");
+        String defaultSqliteUrl = "jdbc:sqlite:" + defaultDataDir().resolve("pomodone.db");
+        String url = firstNonEmpty(env.get("DB_URL"), defaultSqliteUrl);
         String user = firstNonEmpty(env.get("DB_USER"), "postgres");
         String password = firstNonEmpty(env.get("DB_PASSWORD"), "");
 
@@ -41,7 +42,7 @@ public class DatabaseConfig {
             }
             // Koneksi utama gagal (URL salah/psql down), pakai SQLite sebagai fallback lokal
             log.warn("Koneksi DB utama gagal, fallback ke SQLite: {}", e.getMessage());
-            String fallbackUrl = "jdbc:sqlite:./pomodone.db";
+            String fallbackUrl = defaultSqliteUrl;
             DataSource fallback = buildDataSource(fallbackUrl, null, null);
             runMigrations(fallback);
             resolved = fallback;
@@ -87,6 +88,28 @@ public class DatabaseConfig {
 
     private boolean isSqlite(String url) {
         return url != null && url.startsWith("jdbc:sqlite");
+    }
+
+    private Path defaultDataDir() {
+        String os = System.getProperty("os.name", "").toLowerCase();
+        Path base;
+        if (os.contains("win")) {
+            String appData = System.getenv("APPDATA");
+            base = appData != null ? Paths.get(appData) : Paths.get(System.getProperty("user.home", "."));
+        } else if (os.contains("mac")) {
+            base = Paths.get(System.getProperty("user.home", "."), "Library", "Application Support");
+        } else {
+            base = Paths.get(System.getProperty("user.home", "."), ".local", "share");
+        }
+
+        Path dataDir = base.resolve("pomodone");
+        try {
+            Files.createDirectories(dataDir);
+        } catch (Exception e) {
+            log.warn("Gagal membuat folder data {}, fallback ke current dir", dataDir, e);
+            return Paths.get(".");
+        }
+        return dataDir;
     }
 
     private String firstNonEmpty(String... values) {

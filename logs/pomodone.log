@@ -1,0 +1,27 @@
+2025-12-04 12:00:17.675 INFO  n.fortuna.ical4j.util.Configurator - ical4j.properties not found.
+2025-12-04 12:00:18.500 INFO  com.zaxxer.hikari.HikariDataSource - PomodonePgPool - Starting...
+2025-12-04 12:00:19.851 WARN  com.pomodone.config.DatabaseConfig - Koneksi DB utama gagal, fallback ke SQLite: Failed to initialize pool: FATAL: database "pomodone" does not exist
+2025-12-04 12:00:19.852 INFO  com.zaxxer.hikari.HikariDataSource - PomodoneSqlitePool - Starting...
+2025-12-04 12:00:20.675 INFO  com.zaxxer.hikari.pool.HikariPool - PomodoneSqlitePool - Added connection org.sqlite.jdbc4.JDBC4Connection@46a740e
+2025-12-04 12:00:20.679 INFO  com.zaxxer.hikari.HikariDataSource - PomodoneSqlitePool - Start completed.
+2025-12-04 12:00:21.251 INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:sqlite:/Users/ikajtk/Library/Application Support/pomodone/pomodone.db (SQLite 3.45)
+2025-12-04 12:00:21.305 INFO  o.f.c.i.s.JdbcTableSchemaHistory - Schema history table "main"."flyway_schema_history" does not exist yet
+2025-12-04 12:00:21.318 INFO  o.f.core.internal.command.DbValidate - Successfully validated 1 migration (execution time 00:00.026s)
+2025-12-04 12:00:21.328 INFO  o.f.c.i.s.JdbcTableSchemaHistory - Creating Schema History table "main"."flyway_schema_history" ...
+2025-12-04 12:00:21.376 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "main": << Empty Schema >>
+2025-12-04 12:00:21.385 INFO  o.f.core.internal.command.DbMigrate - Migrating schema "main" to version "1 - Baseline"
+2025-12-04 12:00:21.426 INFO  o.f.core.internal.command.DbMigrate - Successfully applied 1 migration to schema "main", now at version v1 (execution time 00:00.012s)
+2025-12-04 12:00:40.024 INFO  c.pomodone.repository.TaskRepository - Task 3 berhasil dihapus
+2025-12-04 12:04:34.387 INFO  n.fortuna.ical4j.util.Configurator - ical4j.properties not found.
+2025-12-04 12:04:35.370 INFO  com.zaxxer.hikari.HikariDataSource - PomodonePgPool - Starting...
+2025-12-04 12:04:36.543 WARN  com.pomodone.config.DatabaseConfig - Koneksi DB utama gagal, fallback ke SQLite: Failed to initialize pool: Connection to localhost:5432 refused. Check that the hostname and port are correct and that the postmaster is accepting TCP/IP connections.
+2025-12-04 12:04:36.544 INFO  com.zaxxer.hikari.HikariDataSource - PomodoneSqlitePool - Starting...
+2025-12-04 12:04:37.353 INFO  com.zaxxer.hikari.pool.HikariPool - PomodoneSqlitePool - Added connection org.sqlite.jdbc4.JDBC4Connection@6754f9c
+2025-12-04 12:04:37.356 INFO  com.zaxxer.hikari.HikariDataSource - PomodoneSqlitePool - Start completed.
+2025-12-04 12:04:37.939 INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:sqlite:/Users/ikajtk/Library/Application Support/pomodone/pomodone.db (SQLite 3.45)
+2025-12-04 12:04:38.017 INFO  o.f.core.internal.command.DbValidate - Successfully validated 1 migration (execution time 00:00.038s)
+2025-12-04 12:04:38.030 INFO  o.f.core.internal.command.DbMigrate - Current version of schema "main": 1
+2025-12-04 12:04:38.036 INFO  o.f.core.internal.command.DbMigrate - Schema "main" is up to date. No migration necessary.
+2025-12-04 12:09:59.429 INFO  c.pomodone.repository.TaskRepository - Task 2 berhasil dihapus
+2025-12-04 12:10:34.316 INFO  c.p.facade.TaskManagementFacade - Menyimpan perubahan task 1
+2025-12-04 12:10:46.933 INFO  c.pomodone.repository.TaskRepository - Task 1 berhasil dihapus
