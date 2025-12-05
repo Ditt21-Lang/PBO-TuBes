@@ -7,14 +7,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("java:S6548")
 public class DatabaseConfig {
     private static final Logger log = LoggerFactory.getLogger(DatabaseConfig.class);
     private static final String USER_HOME = "user.home";
@@ -34,8 +35,8 @@ public class DatabaseConfig {
             runMigrations(primary);
             resolved = primary;
         } catch (Exception e) {
-            if (primary instanceof HikariDataSource) {
-                ((HikariDataSource) primary).close();
+            if (primary instanceof HikariDataSource hikariDataSource) {
+                hikariDataSource.close();
             }
             if (isSqlite(url)) {
                 throw new com.pomodone.exception.DatabaseException("Gagal inisialisasi SQLite: " + e.getMessage(), e);

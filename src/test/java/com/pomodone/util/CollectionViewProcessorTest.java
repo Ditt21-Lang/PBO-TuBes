@@ -104,7 +104,10 @@ class CollectionViewProcessorTest {
 
     @Test
     void apply_nullSourceLemparNpe() {
-        assertThrows(NullPointerException.class, () -> processor.apply(null, item -> true, Comparator.comparingInt(TestItem::rank), SortDirection.ASC));
+        Predicate<TestItem> alwaysTrue = item -> true;
+        Comparator<TestItem> comparator = Comparator.comparingInt(TestItem::rank);
+
+        assertThrows(NullPointerException.class, () -> processor.apply(null, alwaysTrue, comparator, SortDirection.ASC));
     }
 
     private record TestItem(String name, int rank) {}

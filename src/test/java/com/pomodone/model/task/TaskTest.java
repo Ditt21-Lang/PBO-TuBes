@@ -40,7 +40,9 @@ class TaskTest {
 
     @Test
     void builder_wajibTitleDanDifficulty() {
-        assertThrows(NullPointerException.class, () -> Task.builder().difficulty(TaskDifficulty.MUDAH).build());
+        TaskBuilder builder = Task.builder().difficulty(TaskDifficulty.MUDAH);
+
+        assertThrows(NullPointerException.class, builder::build);
     }
 
     @Test

@@ -21,12 +21,15 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Toggle;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class PomodoroController {
     private static final Logger log = LoggerFactory.getLogger(PomodoroController.class);
+    private static final String FIELD_ERROR_CLASS = "field-error";
+    private static final String MINUTES_LABEL = " minutes";
 
     @FXML private Label statusLabel;
     @FXML private Label hoursLabel;
@@ -113,77 +116,79 @@ public class PomodoroController {
     }
 
     private void setupActionHandlers() {
-        startButton.setOnAction(event -> {
-            PomodoroService.TimerState state = pomodoroFacade.timerStateProperty().get();
-            boolean isCustom = customModeButton.isSelected();
-
-            // Hanya apply/persist custom ketika start dari kondisi STOPPED,
-            // supaya pause/resume tidak mereset timer.
-            if (isCustom && state == PomodoroService.TimerState.STOPPED) {
-                validateAllCustomFields();
-                if (!areAllCustomFieldsValid()) {
-                    return;
-                }
-                applyCustomSettings();
-                persistCustomPreset();
-            }
-            pomodoroFacade.handleStartPause();
-        });
+        startButton.setOnAction(event -> handleStartButtonAction());
         stopButton.setOnAction(event -> pomodoroFacade.stopAndResetTimer());
 
-        modeToggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
-            if (newToggle == null && oldToggle != null) {
-                oldToggle.setSelected(true); return;
+        modeToggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> handleModeToggleSelection(oldToggle, newToggle));
+    }
+
+    private void handleStartButtonAction() {
+        PomodoroService.TimerState state = pomodoroFacade.timerStateProperty().get();
+
+        // Hanya apply/persist custom ketika start dari kondisi STOPPED,
+        // supaya pause/resume tidak mereset timer.
+        if (isCustomStartFromStopped(state)) {
+            validateAllCustomFields();
+            if (!areAllCustomFieldsValid()) {
+                return;
             }
-            if (newToggle == classicModeButton) {
-                updateSettingsView(PomodoroService.PomodoroMode.CLASSIC);
-                pomodoroFacade.selectMode(PomodoroService.PomodoroMode.CLASSIC);
-            } else if (newToggle == intenseModeButton) {
-                updateSettingsView(PomodoroService.PomodoroMode.INTENSE);
-                pomodoroFacade.selectMode(PomodoroService.PomodoroMode.INTENSE);
-            } else if (newToggle == customModeButton) {
-                updateSettingsView(PomodoroService.PomodoroMode.CUSTOM);
-                validateAllCustomFields(); // validasi sekali pas ganti
-                applyCustomSettings();
-            }
-        });
+            applyCustomSettings();
+            persistCustomPreset();
+        }
+        pomodoroFacade.handleStartPause();
+    }
+
+    private boolean isCustomStartFromStopped(PomodoroService.TimerState state) {
+        return customModeButton.isSelected() && state == PomodoroService.TimerState.STOPPED;
+    }
+
+    private void handleModeToggleSelection(Toggle oldToggle, Toggle newToggle) {
+        if (newToggle == null && oldToggle != null) {
+            oldToggle.setSelected(true);
+            return;
+        }
+        PomodoroService.PomodoroMode mode = resolveMode(newToggle);
+        updateSettingsView(mode);
+
+        if (mode == PomodoroService.PomodoroMode.CUSTOM) {
+            validateAllCustomFields(); // validasi sekali pas ganti
+            applyCustomSettings();
+            return;
+        }
+        pomodoroFacade.selectMode(mode);
+    }
+
+    private PomodoroService.PomodoroMode resolveMode(Toggle toggle) {
+        if (toggle == classicModeButton) {
+            return PomodoroService.PomodoroMode.CLASSIC;
+        }
+        if (toggle == intenseModeButton) {
+            return PomodoroService.PomodoroMode.INTENSE;
+        }
+        return PomodoroService.PomodoroMode.CUSTOM;
     }
 
     private void updateStartButtonState() {
         boolean isCustomMode = customModeButton.isSelected();
         boolean areCustomFieldsInvalid = !isFocusValid.get() || !isShortBreakValid.get() || !isLongBreakValid.get() || !isRoundsValid.get();
         
-        if (isCustomMode && areCustomFieldsInvalid) {
-            startButton.setDisable(true);
-        } else {
-            startButton.setDisable(false);
-        }
+        startButton.setDisable(isCustomMode && areCustomFieldsInvalid);
     }
 
     private void setupValidationListeners() {
-        customFocusField.textProperty().addListener((obs, oldV, newV) -> {
-            if (isFocusValid.get() != validatePositiveInteger(newV, customFocusField, focusErrorLabel, false)) {
-                isFocusValid.set(!isFocusValid.get());
+        attachValidationListener(customFocusField, focusErrorLabel, isFocusValid, false);
+        attachValidationListener(customShortBreakField, shortBreakErrorLabel, isShortBreakValid, true);
+        attachValidationListener(customLongBreakField, longBreakErrorLabel, isLongBreakValid, true);
+        attachValidationListener(customRoundsField, roundsErrorLabel, isRoundsValid, false);
+    }
+
+    private void attachValidationListener(TextField field, Label errorLabel, BooleanProperty validityProperty, boolean allowZero) {
+        field.textProperty().addListener((obs, oldV, newV) -> {
+            boolean isValid = validatePositiveInteger(newV, field, errorLabel, allowZero);
+            validityProperty.set(isValid);
+            if (isValid) {
+                applyCustomSettings();
             }
-            if (isFocusValid.get()) applyCustomSettings();
-        });
-        customShortBreakField.textProperty().addListener((obs, oldV, newV) -> {
-            if (isShortBreakValid.get() != validatePositiveInteger(newV, customShortBreakField, shortBreakErrorLabel, true)) {
-                isShortBreakValid.set(!isShortBreakValid.get());
-            }
-            if(isShortBreakValid.get()) applyCustomSettings();
-        });
-        customLongBreakField.textProperty().addListener((obs, oldV, newV) -> {
-            if (isLongBreakValid.get() != validatePositiveInteger(newV, customLongBreakField, longBreakErrorLabel, true)) {
-                isLongBreakValid.set(!isLongBreakValid.get());
-            }
-            if(isLongBreakValid.get()) applyCustomSettings();
-        });
-        customRoundsField.textProperty().addListener((obs, oldV, newV) -> {
-            if (isRoundsValid.get() != validatePositiveInteger(newV, customRoundsField, roundsErrorLabel, false)) {
-                isRoundsValid.set(!isRoundsValid.get());
-            }
-            if(isRoundsValid.get()) applyCustomSettings();
         });
     }
     
@@ -215,9 +220,9 @@ public class PomodoroController {
         errorLabel.setVisible(showError);
         errorLabel.setManaged(showError);
         if (showError) {
-            if (!field.getStyleClass().contains("field-error")) field.getStyleClass().add("field-error");
+            if (!field.getStyleClass().contains(FIELD_ERROR_CLASS)) field.getStyleClass().add(FIELD_ERROR_CLASS);
         } else {
-            field.getStyleClass().remove("field-error");
+            field.getStyleClass().remove(FIELD_ERROR_CLASS);
         }
     }
     
@@ -256,9 +261,9 @@ public class PomodoroController {
     }
     
     private void populateDisplayLabels(PomodoroSettings settings) {
-        displayFocusLabel.setText(settings.getFocusDuration().toMinutes() + " minutes");
-        displayShortBreakLabel.setText(settings.getShortBreakDuration().toMinutes() + " minutes");
-        displayLongBreakLabel.setText(settings.getLongBreakDuration().toMinutes() + " minutes");
+        displayFocusLabel.setText(settings.getFocusDuration().toMinutes() + MINUTES_LABEL);
+        displayShortBreakLabel.setText(settings.getShortBreakDuration().toMinutes() + MINUTES_LABEL);
+        displayLongBreakLabel.setText(settings.getLongBreakDuration().toMinutes() + MINUTES_LABEL);
         displayRoundsLabel.setText(String.valueOf(settings.getRoundsBeforeLongBreak()));
     }
 
