@@ -7,7 +7,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-@SuppressWarnings("java:S101")
 public class V1__Baseline extends BaseJavaMigration {
 
     @Override

@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Objects;
 
-@SuppressWarnings({"java:S2696", "java:S6548"}) // Suppress warning for writing to static field from instance method and Singleton pattern
 public class MainWindowController {
     private static final Logger log = LoggerFactory.getLogger(MainWindowController.class);
 

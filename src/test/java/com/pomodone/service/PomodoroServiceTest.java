@@ -193,7 +193,6 @@ class PomodoroServiceTest {
         try {
             Field f = PomodoroService.class.getDeclaredField("sessionType");
             f.setAccessible(true);
-            @SuppressWarnings("unchecked")
             ReadOnlyObjectWrapper<PomodoroService.SessionType> wrapper =
                     (ReadOnlyObjectWrapper<PomodoroService.SessionType>) f.get(pomodoroService);
             return wrapper.get();

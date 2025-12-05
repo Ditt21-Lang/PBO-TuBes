@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import java.net.URL;
 import java.time.LocalDateTime;
 
-@SuppressWarnings("java:S6548")
 
 public class PomodoroService {
     private static PomodoroService instance;

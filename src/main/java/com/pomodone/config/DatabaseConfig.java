@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("java:S6548")
 public class DatabaseConfig {
     private static final Logger log = LoggerFactory.getLogger(DatabaseConfig.class);
     private static final String USER_HOME = "user.home";
