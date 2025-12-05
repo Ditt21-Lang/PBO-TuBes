@@ -20,7 +20,7 @@ class PomodoroServiceTest {
     private FakePomodoroSessionService sessionService;
     private PomodoroService pomodoroService;
 
-    // Inisialisasi JavaFX Platform sekali sebelum semua test dijalankan
+    // Inisialisasi JavaFX sekali buat semua test
     @BeforeAll
     static void initJavaFX() throws InterruptedException {
         try {
@@ -36,15 +36,15 @@ class PomodoroServiceTest {
 
     @BeforeEach
     void setUp() {
-        // 1. Buat Fake Object manual
+        // Bikin fake service manual
         sessionService = new FakePomodoroSessionService();
 
-        // 2. Setup Service di dalam Thread JavaFX
+        // Setup service di thread JavaFX
         CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
             pomodoroService = PomodoroService.getInstance();
             pomodoroService.setSessionService(sessionService);
-            pomodoroService.stopAndResetTimer(); // Reset state
+            pomodoroService.stopAndResetTimer(); // reset state
             latch.countDown();
         });
         
@@ -59,14 +59,13 @@ class PomodoroServiceTest {
     void handleStartPause_ShouldToggleState() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
-            // Initial state should be STOPPED
+            // mulai dari STOPPED
             assertEquals(PomodoroService.TimerState.STOPPED, pomodoroService.timerStateProperty().get());
 
-            // Start
+            // mulai lalu pause
             pomodoroService.handleStartPause();
             assertEquals(PomodoroService.TimerState.RUNNING, pomodoroService.timerStateProperty().get());
 
-            // Pause
             pomodoroService.handleStartPause();
             assertEquals(PomodoroService.TimerState.PAUSED, pomodoroService.timerStateProperty().get());
             
@@ -79,7 +78,7 @@ class PomodoroServiceTest {
     void stopAndResetTimer_ShouldResetState() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
-            pomodoroService.handleStartPause(); // Start
+            pomodoroService.handleStartPause(); // mulai
             pomodoroService.stopAndResetTimer();
 
             assertEquals(PomodoroService.TimerState.STOPPED, pomodoroService.timerStateProperty().get());
@@ -128,7 +127,7 @@ class PomodoroServiceTest {
         CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
             pomodoroService.stopAndResetTimer();
-            pomodoroService.handleStartPause(); // start fokus
+            pomodoroService.handleStartPause(); // mulai fokus
             setField("alarmSound", null); // biar callback alarm langsung jalan
             setField("roundsCompleted", 3); // seolah sudah 3 focus selesai
             setField("timeRemaining", Duration.ofSeconds(1));
