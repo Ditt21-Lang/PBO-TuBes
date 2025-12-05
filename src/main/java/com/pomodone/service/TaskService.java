@@ -1,13 +1,12 @@
 package com.pomodone.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.pomodone.model.task.Task;
 import com.pomodone.model.task.TaskDifficulty;
 import com.pomodone.model.task.TaskStatus;
 import com.pomodone.repository.TaskRepository;
-
-import java.util.List;
 
 public class TaskService {
     private final TaskRepository taskRepository;
@@ -16,7 +15,6 @@ public class TaskService {
         this(new TaskRepository());
     }
 
-    // ctor ini buat kebutuhan pengujian (injeksi mock)
     TaskService(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
     }
