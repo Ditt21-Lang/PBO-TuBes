@@ -21,7 +21,7 @@
         <Region HBox.hgrow="ALWAYS"/>
         <HBox alignment="CENTER_LEFT" spacing="16.0">
             <TextField fx:id="dashboardSearchField" prefWidth="240.0" promptText="Search tasks..." styleClass="search-field"/>
-            <Button mnemonicParsing="false" styleClass="primary-button" text="+ New Task"/>
+            <Button fx:id="addTaskButton" mnemonicParsing="false" styleClass="primary-button" text="+ New Task"/>
         </HBox>
     </HBox>
 

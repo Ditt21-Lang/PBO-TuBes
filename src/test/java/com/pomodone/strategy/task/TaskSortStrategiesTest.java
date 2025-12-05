@@ -4,6 +4,8 @@ import com.pomodone.model.task.Task;
 import com.pomodone.model.task.TaskDifficulty;
 import com.pomodone.model.task.TaskStatus;
 import com.pomodone.util.SortDirection;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -14,6 +16,18 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TaskSortStrategiesTest {
+
+    private LocalDateTime now;
+
+    @BeforeEach
+    void setUp() {
+        now = LocalDateTime.now();
+    }
+
+    @AfterEach
+    void tearDown() {
+        now = null;
+    }
 
     @Test
     void nameAsc_desc() {
@@ -34,7 +48,6 @@ class TaskSortStrategiesTest {
 
     @Test
     void dueDateAsc_nullDiAkhir() {
-        LocalDateTime now = LocalDateTime.now();
         Task t1 = task("A", TaskDifficulty.SEDANG, now.plusDays(1));
         Task t2 = task("B", TaskDifficulty.SEDANG, now);
         Task t3 = task("C", TaskDifficulty.SEDANG, null);
@@ -62,6 +75,16 @@ class TaskSortStrategiesTest {
         assertEquals(List.of(easy, med, hard), list);
         assertEquals(SortDirection.ASC, new DifficultyAscSortStrategy().getDirection());
         assertEquals(SortDirection.DESC, new DifficultyDescSortStrategy().getDirection());
+    }
+
+    @Test
+    void nameComparator_caseInsensitive() {
+        Task upper = task("ZULU", TaskDifficulty.MUDAH, null);
+        Task lower = task("alpha", TaskDifficulty.MUDAH, null);
+        List<Task> list = new ArrayList<>(List.of(upper, lower));
+
+        list.sort(new NameAscSortStrategy().getComparator());
+        assertEquals(List.of(lower, upper), list);
     }
 
     private Task task(String title, TaskDifficulty difficulty, LocalDateTime due) {

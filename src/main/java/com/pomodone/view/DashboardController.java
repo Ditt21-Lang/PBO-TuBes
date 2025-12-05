@@ -8,6 +8,7 @@ import com.pomodone.model.user.User;
 import com.pomodone.model.task.Task;
 import com.pomodone.model.task.TaskDifficulty;
 import com.pomodone.model.task.TaskStatus;
+import com.pomodone.view.util.SearchContext;
 import javafx.scene.control.TextField;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -31,6 +32,7 @@ public class DashboardController {
     @FXML private Label headerSubtitle;
     @FXML private VBox priorityTasksBox;
     @FXML private TextField dashboardSearchField;
+    @FXML private javafx.scene.control.Button addTaskButton;
 
     private final DashboardStatsService statsService = new DashboardStatsService();
     private final TaskService taskService = new TaskService();
@@ -42,6 +44,7 @@ public class DashboardController {
         loadStats();
         loadPriorityTasks();
         setupSearchHandler();
+        setupAddTaskHandler();
     }
 
     private void loadStats() {
@@ -63,6 +66,18 @@ public class DashboardController {
         if (mainWindow != null) {
             mainWindow.navigateToTaskListWithSearch(query);
         }
+    }
+
+    private void setupAddTaskHandler() {
+        if (addTaskButton == null) return;
+        addTaskButton.setOnAction(event -> {
+            MainWindowController mainWindow = MainWindowController.getInstance();
+            if (mainWindow != null) {
+                SearchContext.setPendingAdd(true);
+                SearchContext.setPendingQuery(null);
+                mainWindow.navigateToTaskListWithSearch(null);
+            }
+        });
     }
 
     private void loadPriorityTasks() {

@@ -113,6 +113,7 @@ public class TaskListController {
         setupSearchField();
         loadTaskFromDatabase();
         applyPendingSearch();
+        applyPendingAdd();
         deleteTaskButton.setOnAction(e -> handleDeleteTask());
         editTaskButton.setOnAction(e -> showEditTaskDialog(selectedTask));
         markDoneButton.setOnAction(e -> handleMarkDone());
@@ -136,6 +137,13 @@ public class TaskListController {
             taskSearchField.setText(pending);
             currentSearch = pending.trim();
             refreshTaskList();
+        }
+    }
+
+    private void applyPendingAdd() {
+        boolean shouldAdd = com.pomodone.view.util.SearchContext.consumePendingAdd();
+        if (shouldAdd) {
+            showAddTaskDialog();
         }
     }
 

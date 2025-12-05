@@ -115,6 +115,12 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
+                    <!-- Hindari warning JavaFX native access saat test -->
+                    <argLine>--enable-native-access=ALL-UNNAMED</argLine>
+                    <!-- Pakai SQLite test DB supaya tidak ada log fallback Postgres -->
+                    <systemPropertyVariables>
+                        <DB_URL>jdbc:sqlite:target/test.db</DB_URL>
+                    </systemPropertyVariables>
                     <useModulePath>false</useModulePath>
                 </configuration>
             </plugin>

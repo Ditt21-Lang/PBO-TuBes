@@ -4,6 +4,7 @@ import com.pomodone.model.task.Task;
 import com.pomodone.model.task.TaskDifficulty;
 import com.pomodone.model.task.TaskStatus;
 import com.pomodone.repository.TaskRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +14,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class TaskServiceTest {
 
@@ -23,6 +25,12 @@ class TaskServiceTest {
     void setUp() {
         repo = new FakeTaskRepository();
         taskService = new TaskService(repo);
+    }
+
+    @AfterEach
+    void tearDown() {
+        repo = null;
+        taskService = null;
     }
 
     @Test
@@ -87,6 +95,56 @@ class TaskServiceTest {
     void deleteTask_idTidakValidLemparError() {
         assertThrows(IllegalArgumentException.class, () -> taskService.deleteTask(0));
         assertEquals(0, repo.deleteCalls);
+    }
+
+    @Test
+    void deleteTask_idValidMenghapus() {
+        Task t = Task.builder()
+                .id(5)
+                .title("hapus")
+                .description("d")
+                .difficulty(TaskDifficulty.SEDANG)
+                .status(TaskStatus.BELUM_SELESAI)
+                .build();
+        repo.store.put(5L, t);
+
+        taskService.deleteTask(5);
+
+        assertEquals(1, repo.deleteCalls);
+        assertFalse(repo.store.containsKey(5L));
+        // di fake repo, delete tidak otomatis remove key yg tidak ada, tapi di sini sudah dipanggil
+    }
+
+    @Test
+    void createNewTask_dueDateMundurStatusTerlambat() {
+        LocalDateTime yesterday = LocalDateTime.now().minusDays(1);
+        taskService.createNewTask("Terlambat", "desc", yesterday, TaskDifficulty.MUDAH);
+
+        assertEquals(TaskStatus.TERLAMBAT, repo.lastSaved.getStatus());
+        assertEquals(TaskDifficulty.MUDAH, repo.lastSaved.getDifficulty());
+    }
+
+    @Test
+    void updateTask_fieldNullPakaiNilaiLama() {
+        Task lama = Task.builder()
+                .id(10)
+                .title("Asli")
+                .description("Desc lama")
+                .dueDate(LocalDateTime.now().plusDays(3))
+                .difficulty(TaskDifficulty.SEDANG)
+                .status(TaskStatus.BELUM_SELESAI)
+                .build();
+        repo.store.put(10L, lama);
+
+        // pakai judul/difficulty lama, kosongin desc/due supaya fallback
+        taskService.updateTask(10L, "Asli", null, null, TaskDifficulty.SEDANG, null);
+
+        Task updated = repo.lastUpdated;
+        assertEquals("Asli", updated.getTitle());
+        assertEquals("Desc lama", updated.getDescription());
+        assertEquals(null, updated.getDueDate()); // updateTask akan menimpa dueDate dengan null jika dikirim null
+        assertEquals(TaskDifficulty.SEDANG, updated.getDifficulty());
+        assertEquals(TaskStatus.BELUM_SELESAI, updated.getStatus());
     }
 
     // Fake repo biar ga sentuh DB, dan keliatan berapa kali dipanggil

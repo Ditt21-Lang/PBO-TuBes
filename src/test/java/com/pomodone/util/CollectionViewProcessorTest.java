@@ -1,5 +1,7 @@
 package com.pomodone.util;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Comparator;
@@ -8,10 +10,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CollectionViewProcessorTest {
 
-    private final CollectionViewProcessor<TestItem> processor = new CollectionViewProcessor<>();
+    private CollectionViewProcessor<TestItem> processor;
+
+    @BeforeEach
+    void setUp() {
+        processor = new CollectionViewProcessor<>();
+    }
+
+    @AfterEach
+    void tearDown() {
+        processor = null;
+    }
 
     @Test
     void apply_filtersAndSortsAscending() {
@@ -87,6 +100,11 @@ class CollectionViewProcessorTest {
 
         assertEquals(List.of(a, c), result);
         assertEquals(3, filterHits.get());
+    }
+
+    @Test
+    void apply_nullSourceLemparNpe() {
+        assertThrows(NullPointerException.class, () -> processor.apply(null, item -> true, Comparator.comparingInt(TestItem::rank), SortDirection.ASC));
     }
 
     private record TestItem(String name, int rank) {}
